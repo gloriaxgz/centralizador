@@ -2,7 +2,7 @@ import { kv } from '@vercel/kv';
 
 export default async function handler(req, res) {
   const GNEWS_KEY = process.env.GNEWS_KEY;
-  const q = '"Artificial Intelligence" OR "Generative AI" OR "NVIDIA"';
+  const q = '"Artificial Intelligence" OR "Generative AI" OR "NVIDIA" -india -indian';
   const forceUpdate = req.query.force === 'true';
 
   try {

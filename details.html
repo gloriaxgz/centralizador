@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="templatemo">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+  <title>News Radar</title>
+  
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+  <link rel="stylesheet" href="assets/css/animate.css">
+  
+  <link rel="stylesheet" href="assets/css/news-carousel.css">
+</head>
+
+<body>
+
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner"><span class="dot"></span><div class="dots"><span></span><span></span><span></span></div></div>
+  </div>
+
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row"><div class="col-12">
+        <nav class="main-nav">
+          <a href="index.html" class="logo"><img src="assets/images/logo.png" alt=""></a>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="create.html">Transcritor de Podcast</a></li>
+            <li><a href="details.html" class="active">News Radar</a></li>
+          </ul>
+          <a class='menu-trigger'><span>Menu</span></a>
+        </nav>
+      </div></div>
+    </div>
+  </header>
+
+  <div class="page-heading normal-space">
+    <div class="container"><div class="row"><div class="col-lg-12">
+      <h2>Daily Tech News Curator</h2>
+    </div></div></div>
+  </div>
+
+  <div class="item-details-page">
+    <div class="container"><div class="row">
+
+      <div class="col-lg-12">
+        <div class="section-heading">
+          <div class="line-dec"></div>
+          <h2>Tech <em>Intelligence Radar</em></h2>
+        </div>
+      </div>
+
+      <div class="col-lg-12" id="news-feed-container">
+        <h5 class="text-center" style="color:white;padding:50px;">Buscando e organizando notícias recentes...</h5>
+      </div>
+
+      <div class="col-lg-12 text-center" style="margin-top:30px;">
+        <div id="load-more-container" style="display:none;">
+          <div class="border-button">
+            <a href="javascript:void(0)" id="btn-load-more">Mostrar dias anteriores</a>
+          </div>
+        </div>
+        <div class="main-button" style="margin-top:30px;">
+          <a href="javascript:void(0)" id="btn-generate-report"
+             style="display:none;background-color:#7453f8;border-color:#7453f8;padding:15px 30px;">
+            ✨ Generate AI Report (Selected: <span id="count">0</span>)
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-12" id="summary-section" style="display:none;margin-top:60px;">
+        <div class="section-heading">
+          <div class="line-dec"></div>
+          <h2>AI <em>Executive Summary</em></h2>
+        </div>
+        <div id="summary-output"></div>
+      </div>
+
+    </div></div>
+  </div>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/custom.js"></script>
+
+  <script>
+  // ================= VARIÁVEIS DE ESTADO =================
+  let newsByDate        = {};
+  let selectedArticles  = [];
+  let displayedDatesCount = 0;
+  const DATES_PER_LOAD  = 2;
+  const STORAGE_KEY     = 'tech_news_cache';
+
+  // ================= BOOT =================
+  $(document).ready(async () => {
+    loadCachedNews();
+
+    if (Object.keys(newsByDate).length) {
+      await renderNextBatch();
+    }
+
+    await fetchAndMergeNews();
+  });
+
+  // ================= API & DADOS (Via Backend Seguro) =================
+  async function fetchAndMergeNews() {
+    // Termos de busca enviados para a nossa API
+    const queryTerm = '"Artificial Intelligence" OR "Generative AI" OR "Cybersecurity" OR "NVIDIA" OR "OpenAI"';
+    
+    try {
+      // Chamamos nossa API do Vercel em vez de chamar o GNews direto
+      const response = await fetch(`/api/news?q=${encodeURIComponent(queryTerm)}`);
+      const data = await response.json();
+
+      if (!data.articles?.length) {
+        if (!Object.keys(newsByDate).length)
+          $('#news-feed-container').html('<h5 class="text-center" style="color:white;">Nenhuma notícia encontrada.</h5>');
+        return;
+      }
+
+      let hasUpdates = false;
+      const updatedDates = new Set();
+
+      data.articles.forEach(art => {
+        const dt = new Date(art.publishedAt);
+        const dateKey = dt.toLocaleDateString('pt-BR');
+
+        if (!newsByDate[dateKey]) newsByDate[dateKey] = [];
+
+        const exists = newsByDate[dateKey].some(e => e.url === art.url);
+        if (!exists) {
+          newsByDate[dateKey].push(art);
+          hasUpdates = true;
+          updatedDates.add(dateKey);
+        }
+      });
+
+      if (hasUpdates) {
+        saveCachedNews();
+        
+        for (const date of updatedDates) {
+          const safeId = `carousel-${date.replace(/\//g,'-')}`;
+          const $owl = $(`#${safeId}`);
+          if ($owl.length) {
+            await rebuildCarousel($owl, date);
+          }
+        }
+
+        const allDates = getSortedDates();
+        const renderedDates = allDates.filter(d => $(`#carousel-${d.replace(/\//g,'-')}`).length).length;
+        
+        if (renderedDates < allDates.length && renderedDates < displayedDatesCount + DATES_PER_LOAD) {
+           await renderNextBatch();
+        }
+      }
+
+    } catch(e) {
+      console.error('Erro ao buscar notícias via API:', e);
+    }
+  }
+
+  // ================= GERAÇÃO DO REPORT (Via API /api/chat) =================
+  $('#btn-generate-report').on('click', function() {
+    const $btn = $(this);
+    $btn.text('🤖 AI ANALYZING...').css('pointer-events','none');
+    
+    $('#summary-section').fadeIn();
+    $('#summary-output').html('<p style="color:white;padding:20px;">⚡ Applying intelligence filters via secure server...</p>');
+
+    let articlesInput = "";
+    selectedArticles.forEach((art, index) => {
+        articlesInput += `\n--- ARTICLE ${index+1} ---\nTITLE: ${art.title}\nCONTENT: ${art.desc}\nSOURCE: ${art.source}\n`;
+    });
+
+    const systemPrompt = `You are an expert News Curator for CS students. Summarize each article with high technical depth.`;
+    const userPrompt = `
+      ## TASK ##
+      For EACH provided article, output a structured report:
+      ### [TITLE]
+      ** [High-level summary (2-3 lines)] **
+      - [Detailed Bullet 1 (Technical implications)]
+      - [Detailed Bullet 2]
+      - [Detailed Bullet 3]
+
+      ## RULES ##
+      1. Technical Focus: Explain the 'why' and technology.
+      2. Format: Use HTML tags (<b>, <br>, <hr>). 
+
+      ## ARTICLES ##
+      ${articlesInput}
+    `;
+
+    $.ajax({
+      url: '/api/chat', // <--- Chama nossa API universal
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      data: JSON.stringify({
+        messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.3
+      }),
+      success: res => {
+        // A API devolve o texto na propriedade 'content'
+        const text = res.content;
+        
+        const formattedText = text
+            .replace(/\n/g,'<br>')
+            .replace(/###/g, '')
+            .replace(/\*\*(.*?)\*\*/g,'<strong style="color:#aeb5ea;">$1</strong>');
+
+        $('#summary-output').html(`<div style="color:#eee;font-size:15px;line-height:1.8;text-align:left;padding:20px;background:#1e1e1e;border-radius:10px;border:1px solid #333;">${formattedText}</div>`);
+        
+        $btn.text(`✨ Generate AI Report (Selected: ${selectedArticles.length})`).css('pointer-events','auto');
+        $('html,body').animate({ scrollTop:$('#summary-section').offset().top - 80 }, 800);
+      },
+      error: () => {
+        $('#summary-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ API Error. Verifique os logs do Vercel.</p>');
+        $btn.text(`✨ Generate AI Report`).css('pointer-events','auto');
+      }
+    });
+  });
+
+  // ================= RENDERIZAÇÃO & CARROSSEL =================
+  async function renderNextBatch() {
+    const container   = $('#news-feed-container');
+    const sortedDates = getSortedDates();
+
+    if (container.find('h5').length > 0) container.empty();
+
+    if (displayedDatesCount >= sortedDates.length) {
+      syncLoadMoreButton();
+      return;
+    }
+
+    const batch = sortedDates.slice(displayedDatesCount, displayedDatesCount + DATES_PER_LOAD);
+
+    for (const date of batch) {
+      const safeId = `carousel-${date.replace(/\//g,'-')}`;
+      if ($(`#${safeId}`).length > 0) continue;
+
+      const articles  = newsByDate[date];
+      const cardsHtml = await buildCards(articles);
+
+      const sectionHtml = `
+        <div class="carousel-date-row" data-date="${date}">
+          <h4 class="date-section-header">
+            📅 ${date} <span>(${articles.length} notícias)</span>
+          </h4>
+          <div id="${safeId}" class="owl-carousel owl-theme news-carousel">
+            ${cardsHtml}
+          </div>
+        </div>`;
+      
+      container.append(sectionHtml);
+      initOwlCarousel($(`#${safeId}`));
+    }
+
+    displayedDatesCount += batch.length;
+    syncLoadMoreButton();
+  }
+
+  function initOwlCarousel($el) {
+    if ($el.hasClass('owl-loaded')) return;
+    $el.owlCarousel({
+      items: 3, margin: 30, dots: false, nav: true,
+      navText: ["<i class='fa fa-chevron-left'></i>", "<i class='fa fa-chevron-right'></i>"],
+      responsive: { 0: { items: 1 }, 768: { items: 2 }, 1200: { items: 3 } }
+    });
+  }
+
+  async function rebuildCarousel($owl, date) {
+    $owl.closest('.carousel-date-row').find('.date-section-header span').text(`(${newsByDate[date].length} notícias)`);
+    $owl.trigger('destroy.owl.carousel').removeClass('owl-loaded owl-hidden').find('.owl-stage-outer').children().unwrap();
+    $owl.removeData();
+    $owl.html(await buildCards(newsByDate[date]));
+    initOwlCarousel($owl);
+  }
+
+  async function buildCards(articles) {
+    let html = '';
+    articles.sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+
+    for (const art of articles) {
+      const tags  = generateSmartTags(art.title, art.description);
+      const title = (art.title || 'Sem título').replace(/"/g,'&quot;');
+      const desc  = (art.description || 'Sem descrição').replace(/"/g,'&quot;');
+      const img   = art.image || 'assets/images/current-01.jpg';
+      const source = art.source?.name || 'News';
+
+      html += `
+        <div class="item">
+          <div class="news-item-card">
+            <input type="checkbox" class="news-checkbox" data-title="${title}" data-desc="${desc}" data-source="${source}">
+            <div class="news-image-container">
+              <img src="${img}" alt="News Image" loading="lazy" onerror="this.src='assets/images/current-01.jpg'">
+            </div>
+            <div class="news-content-area">
+              <h4>${art.title || 'Sem Título'}</h4>
+              <a href="${art.url}" target="_blank" class="source-tag">@${source}</a>
+              <p>${art.description || 'Clique para ler a matéria completa.'}</p>
+              <div class="tags-list">${tags}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+    return html;
+  }
+
+  function generateSmartTags(title, desc) {
+    const text = (title + " " + desc).toLowerCase();
+    let foundTags = [];
+    const taxonomy = {
+      'AI & LLM': ['gpt', 'openai', 'gemini', 'llama', 'generative'],
+      'HARDWARE': ['nvidia', 'amd', 'chip', 'gpu'],
+      'SECURITY': ['hacker', 'security', 'malware', 'vulnerability']
+    };
+    for (const [category, keywords] of Object.entries(taxonomy)) {
+      if (keywords.some(k => text.includes(k))) foundTags.push(category);
+    }
+    if (foundTags.length === 0) foundTags.push('TECH');
+    return foundTags.slice(0, 2).map(t => `<span class="news-tag">${t}</span>`).join('');
+  }
+
+  function getSortedDates() {
+    return Object.keys(newsByDate).sort((a,b) => {
+      const parse = s => { const [d,m,y]=s.split('/'); return new Date(y,m-1,d); };
+      return parse(b) - parse(a);
+    });
+  }
+
+  function syncLoadMoreButton() {
+    const total = getSortedDates().length;
+    if (displayedDatesCount >= total) $('#load-more-container').hide();
+    else $('#load-more-container').show();
+  }
+
+  function loadCachedNews() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        newsByDate = parsed.newsByDate || {};
+      }
+    } catch(e) {}
+  }
+
+  function saveCachedNews() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ newsByDate, lastUpdate: new Date().toISOString() }));
+    } catch(e) {}
+  }
+
+  $(document).on('change', '.news-checkbox', function() {
+    const card = $(this).closest('.news-item-card');
+    const data = { title: $(this).data('title'), desc: $(this).data('desc'), source: $(this).data('source') };
+    if (this.checked) { card.addClass('selected'); selectedArticles.push(data); }
+    else { card.removeClass('selected'); selectedArticles = selectedArticles.filter(a => a.title !== data.title); }
+    $('#count').text(selectedArticles.length);
+    if (selectedArticles.length > 0) $('#btn-generate-report').fadeIn();
+    else $('#btn-generate-report').fadeOut();
+  });
+
+  $('#btn-load-more').on('click', () => renderNextBatch());
+  </script>
+</body>
+</html>

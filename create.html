@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="templatemo">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <title>Transcritor de Podcasts</title>
+
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+  <link rel="stylesheet" href="assets/css/animate.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+
+</head>
+
+<body>
+
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <a href="index.html" class="logo">
+              <img src="assets/images/logo.png" alt="">
+            </a>
+            <ul class="nav">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="create.html" class="active">Transcritor de Podcast</a></li>
+                        <li><a href="details.html">News Radar</a></li>
+            </ul>
+            <a class='menu-trigger'><span>Menu</span></a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-heading normal-space">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <h2>Transcritor de Podcasts</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="item-details-page">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="section-heading">
+            <div class="line-dec"></div>
+            <h2>Cole o link do episódio abaixo</h2>
+            <p>Caso queira encontrar algum link de episódio, clique <a href="https://www.listennotes.com/">aqui</a>.</p>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <form id="transcription-form">
+            <div class="row">
+              <div class="col-lg-12">
+                <fieldset>
+                  <label for="audio-url">Link Direto do Áudio (.mp3)</label>
+                  <input type="text" id="audio-url" placeholder="https://exemplo.com/audio.mp3" required 
+                         style="background-color: #37393c; color: white; border: none; padding: 15px; border-radius: 20px; width: 100%; margin-bottom: 20px;">
+                </fieldset>
+              </div>
+              <div class="col-lg-12">
+                <fieldset>
+                  <button type="submit" id="form-submit" class="orange-button">Iniciar Transcrição</button>
+                </fieldset>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="col-lg-12" id="section-resultados" style="margin-top: 50px; display:none;">
+          
+          <div class="section-heading">
+            <div class="line-dec"></div>
+            <h2>Sua <em>Transcrição</em></h2>
+          </div>
+          
+          <div class="action-buttons">
+            <button class="btn-toggle" id="toggle-transcricao">▼ Expandir Texto</button>
+            <button class="btn-copy" id="copy-transcricao">Copiar Transcrição</button>
+          </div>
+
+          <div id="resultado-container" class="collapsed" style="background: #282b2f; padding: 30px; border-radius: 20px; color: white; border: 1px solid #444;">
+            <p id="texto-transcrito"></p>
+          </div>
+
+          <div id="container-topicos" style="display:none; margin-top: 50px;">
+            <div class="section-heading">
+              <div class="line-dec"></div>
+              <h2>O que deseja <em>Resumir?</em></h2>
+            </div>
+            
+            <div id="lista-topicos" class="topic-selection-card">
+              <p style="color: white; text-align: center;">Analisando assuntos e gerando prévias robustas...</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+              <button id="btn-gerar-resumo-final" class="orange-button" style="background-color: #275b68; border-color: #ffffff;"> Gerar Relatório Individualizado</button>
+            </div>
+          </div>
+
+          <div id="resumo-wrapper" style="display:none; margin-top: 50px;">
+            <div class="section-heading">
+              <div class="line-dec"></div>
+              <h2>Relatório <em>Executivo por Tópico</em></h2>
+            </div>
+            <div class="action-buttons">
+                <button class="btn-copy" id="copy-resumo">Copiar Relatório Completo</button>
+            </div>
+            <div id="resultado-resumo" style="text-align: left; background: #1f2124; padding: 40px; border-radius: 20px; border: 1px dashed #5d3cf2; color: #ddd;">
+                </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/isotope.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/tabs.js"></script>
+  <script src="assets/js/popup.js"></script>
+  <script src="assets/js/custom.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      // NOTA: As chaves agora ficam no Vercel (Settings -> Environment Variables).
+      // O código abaixo chama a pasta /api/ para buscar os dados com segurança.
+
+      // --- 1. TRANSCRIÇÃO (Chama api/transcribe.js) ---
+      $('#transcription-form').on('submit', function(e) {
+        e.preventDefault();
+        const $botao = $('#form-submit');
+        $botao.text('Transcrevendo... (Isso pode demorar)').prop('disabled', true);
+        
+        $('#section-resultados').fadeIn();
+        $('#texto-transcrito').text('Enviando áudio para processamento seguro...');
+        $('#container-topicos, #resumo-wrapper').hide();
+
+        $.ajax({
+          url: '/api/transcribe', // <--- MUDANÇA: Chama nosso backend seguro
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          data: JSON.stringify({ url: $('#audio-url').val() }),
+          success: function(response) {
+            // A API já devolve o texto limpo na propriedade 'transcript'
+            const texto = response.transcript;
+            
+            $('#texto-transcrito').text(texto);
+            $botao.text('Iniciar Nova Transcrição').prop('disabled', false);
+            
+            // Inicia a análise de tópicos automaticamente
+            extrairTopicosRobustos(texto);
+          },
+          error: function(err) {
+             console.error(err);
+             $('#texto-transcrito').text('Erro ao transcrever. Verifique se o link é um MP3 válido e acessível.');
+             $botao.text('Tentar Novamente').prop('disabled', false);
+          }
+        });
+      });
+
+      // --- 2. EXTRAÇÃO DE TÓPICOS (Chama api/chat.js) ---
+      function extrairTopicosRobustos(texto) {
+        $('#container-topicos').fadeIn();
+        $('#lista-topicos').html('<p style="color:white; text-align:center;">IA lendo a transcrição e identificando temas...</p>');
+
+        // Limitamos o texto para não estourar o limite da API (aprox 15k caracteres)
+        const textoLimitado = texto.substring(0, 15000);
+
+        $.ajax({
+          url: '/api/chat', // <--- MUDANÇA: Usa a API genérica de chat
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          data: JSON.stringify({
+            messages: [{
+              role: "system",
+              content: "Analyze the transcript and identify 7 main topics. Ignore topics about the hosts of the podcast and about Alura. For each topic: 1. Title (Professional). 2. A robust summary (one paragraph, 3-5 sentences) with relevant info. Return ONLY a JSON array: [{\"title\": \"...\", \"summary\": \"...\"}]"
+            }, { 
+              role: "user", 
+              content: "Transcript: " + textoLimitado
+            }],
+            temperature: 0.3
+          }),
+          success: function(response) {
+            try {
+              // A API devolve o texto na propriedade 'content'
+              const content = response.content;
+              const cleanJson = content.replace(/```json|```/g, ''); // Limpa formatação Markdown se houver
+              const topicos = JSON.parse(cleanJson);
+              
+              let html = '';
+              topicos.forEach(t => {
+                const searchLink = `https://www.google.com/search?q=${encodeURIComponent(t.title)}+news+ai+tech&tbm=nws`;
+                html += `
+                  <label class="topic-item">
+                    <input type="checkbox" name="podcast-topic" value="${t.title}" checked>
+                    <div class="topic-content">
+                        <span class="topic-title">${t.title}</span>
+                        <span class="topic-desc">${t.summary}</span>
+                        <a href="${searchLink}" target="_blank" class="news-link">
+                           <i class="fa fa-external-link"></i> Ver notícias relacionadas
+                        </a>
+                    </div>
+                  </label>`;
+              });
+              $('#lista-topicos').html(html);
+            } catch (e) { 
+                console.error(e);
+                $('#lista-topicos').text('Erro ao processar estrutura dos tópicos.'); 
+            }
+          },
+          error: function() {
+              $('#lista-topicos').text('Erro de comunicação com a IA.');
+          }
+        });
+      }
+
+      // --- 3. RELATÓRIO FINAL (Chama api/chat.js novamente) ---
+      $('#btn-gerar-resumo-final').on('click', function() {
+        const selecionados = [];
+        $("input[name='podcast-topic']:checked").each(function() { selecionados.push($(this).val()); });
+        
+        if (selecionados.length === 0) return alert("Por favor, selecione pelo menos um tópico!");
+
+        const $btn = $(this);
+        $btn.text('IA Escrevendo Relatório...').prop('disabled', true);
+        $('#resumo-wrapper').fadeIn();
+        $('#resultado-resumo').html('Gerando análises técnicas para os tópicos selecionados...');
+
+        $.ajax({
+          url: '/api/chat', // <--- MUDANÇA: Usa a mesma API genérica
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          data: JSON.stringify({
+            messages: [{
+              role: "user",
+              content: `Summarize the following podcast transcript. 
+              IMPORTANT: Create a SEPARATE section for EACH of the following selected topics: ${selecionados.join(", ")}.
+
+              ## Remember: ## 
+              You are an expert News Curator for Computer Science students and AI Engineers.
+              Your goal is to provide a comprehensive technical analysis.
+
+              For EACH provided article below, output a structured report:
+              ### [INSERT TITLE HERE]
+              ** [Insert a high-level summary (2 to 3 lines)] ** - [Detailed Bullet 1] 
+              - [Detailed Bullet 2] 
+              - [Detailed Bullet 3] 
+
+              #### RULES: #### 
+              1. **Depth over Brevity:** Each bullet point must be substantial.
+              2. **Technical Focus:** Explain implications and technologies.
+              3. **Formatting:** Use simple HTML (<b> for bold, <br> for break lines). Separate articles with <hr>.
+
+              ## TRANSCRIPT TO ANALYZE: ##
+              ${$('#texto-transcrito').text().substring(0, 20000)}` // Envia o texto (com limite de segurança)
+            }],
+            temperature: 0.2
+          }),
+          success: function(response) {
+            // A API devolve o texto na propriedade 'content'
+            const resumoFinal = response.content.replace(/\n/g, '<br>');
+            $('#resultado-resumo').html(resumoFinal);
+            
+            $btn.text('Gerar Relatório Individualizado').prop('disabled', false);
+            $('html, body').animate({ scrollTop: $("#resumo-wrapper").offset().top - 50 }, 600);
+          },
+          error: function() {
+             $('#resultado-resumo').html('Erro ao gerar relatório. Tente selecionar menos tópicos.');
+             $btn.text('Tentar Novamente').prop('disabled', false);
+          }
+        });
+      });
+
+      // --- FUNÇÕES DE VISUAL (Não mudam) ---
+      $('#toggle-transcricao').on('click', function() {
+        const container = $('#resultado-container');
+        container.toggleClass('collapsed expanded');
+        $(this).text(container.hasClass('expanded') ? '▲ Recolher Texto' : '▼ Expandir Texto');
+      });
+
+      $('.btn-copy').on('click', function() {
+        const target = $(this).attr('id') === 'copy-transcricao' ? '#texto-transcrito' : '#resultado-resumo';
+        const textToCopy = $(target).text();
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          $(this).text('✅ Copiado!');
+          setTimeout(() => $(this).text('Copiar'), 2000);
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>

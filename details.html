@@ -209,6 +209,8 @@
       const desc = (art.description || 'Sem descrição').replace(/"/g,'&quot;');
       const img = art.image || 'assets/images/current-01.jpg';
       const source = art.source?.name || 'News';
+      // Capturamos a URL da notícia
+      const urlNoticia = art.url || '#';
 
       html += `
         <div class="item">
@@ -219,7 +221,12 @@
             </div>
             <div class="news-content-area">
               <h4>${art.title || 'Sem Título'}</h4>
-              <span class="source-tag">@${source}</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span class="source-tag">@${source}</span>
+                <a href="${urlNoticia}" target="_blank" style="color: #00ffcc; font-weight: bold; font-size: 18px; text-decoration: none;" title="Abrir notícia original">
+                  @
+                </a>
+              </div>
               <p>${art.description || 'Clique para ler a matéria completa.'}</p>
               <div class="tags-list">${tags}</div>
             </div>
@@ -327,4 +334,5 @@
   </style>
 
 </body>
+
 </html>

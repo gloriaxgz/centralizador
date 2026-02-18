@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   // 1. Removemos a trava estrita de POST para teste
   // 2. Pegamos os dados de qualquer lugar (body ou query)
   const audioUrl = req.body?.audioUrl || req.query?.audioUrl;
-  const apiKey = process.env.DEEPGRAM_API_KEY;
+  const apiKey = process.env.DEEPGRAM_KEY;
 
   console.log("Recebido URL:", audioUrl);
   console.log("Método da requisição:", req.method);

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export default async function handler(req, res) {
   const GNEWS_KEY = process.env.GNEWS_KEY;
   // Refinamos a busca e adicionamos termos de exclusão na query
-  const q = '("Brazil" OR "Soccer")';
+  const q = '("Artificial Intelligence" OR "Generative AI" OR "NVIDIA" OR "OpenAI")';
   const forceUpdate = req.query.force === 'true';
 
   try {

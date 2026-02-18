@@ -1,5 +1,8 @@
 import { kv } from '@vercel/kv';
 
+export const revalidate = 0; // Força a Vercel a rodar a função toda vez
+export const dynamic = 'force-dynamic';
+
 export default async function handler(req, res) {
   const GNEWS_KEY = process.env.GNEWS_KEY;
   // Refinamos a busca e adicionamos termos de exclusão na query

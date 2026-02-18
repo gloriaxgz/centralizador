@@ -201,6 +201,7 @@
 
   async function buildCards(articles) {
     let html = '';
+    // Ordena por data (mais recente primeiro)
     articles.sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
     for (const art of articles) {
@@ -209,7 +210,6 @@
       const desc = (art.description || 'Sem descrição').replace(/"/g,'&quot;');
       const img = art.image || 'assets/images/current-01.jpg';
       const source = art.source?.name || 'News';
-      // Capturamos a URL da notícia
       const urlNoticia = art.url || '#';
 
       html += `
@@ -221,12 +221,11 @@
             </div>
             <div class="news-content-area">
               <h4>${art.title || 'Sem Título'}</h4>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              
+              <a href="${urlNoticia}" target="_blank" class="source-link" title="Ler no site original">
                 <span class="source-tag">@${source}</span>
-                <a href="${urlNoticia}" target="_blank" style="color: #00ffcc; font-weight: bold; font-size: 18px; text-decoration: none;" title="Abrir notícia original">
-                  @
-                </a>
-              </div>
+              </a>
+
               <p>${art.description || 'Clique para ler a matéria completa.'}</p>
               <div class="tags-list">${tags}</div>
             </div>
@@ -336,3 +335,4 @@
 </body>
 
 </html>
+

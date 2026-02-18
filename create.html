@@ -149,37 +149,40 @@
 
   <script>
     $(document).ready(function() {
-      // NOTA: As chaves agora ficam no Vercel (Settings -> Environment Variables).
-      // O código abaixo chama a pasta /api/ para buscar os dados com segurança.
-
       // --- 1. TRANSCRIÇÃO (Chama api/transcribe.js) ---
       $('#transcription-form').on('submit', function(e) {
         e.preventDefault();
+        
+        // Captura o valor do input de forma segura e remove espaços extras
+        const linkAudio = $('#audio-url').val().trim(); 
+
+        if (!linkAudio) {
+          alert("Por favor, insira uma URL válida.");
+          return;
+        }
+
         const $botao = $('#form-submit');
         $botao.text('Transcrevendo... (Isso pode demorar)').prop('disabled', true);
         
         $('#section-resultados').fadeIn();
-        $('#texto-transcrito').text('Enviando áudio para processamento seguro...');
+        $('#texto-transcrito').text('A IA está ouvindo o áudio agora...');
         $('#container-topicos, #resumo-wrapper').hide();
 
         $.ajax({
-          url: '/api/transcribe', // <--- MUDANÇA: Chama nosso backend seguro
+          url: '/api/transcribe',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          data: JSON.stringify({ url: $('#audio-url').val() }),
+          // CORREÇÃO: O backend espera 'audioUrl'
+          data: JSON.stringify({ audioUrl: linkAudio }), 
           success: function(response) {
-            // A API já devolve o texto limpo na propriedade 'transcript'
             const texto = response.transcript;
-            
             $('#texto-transcrito').text(texto);
             $botao.text('Iniciar Nova Transcrição').prop('disabled', false);
-            
-            // Inicia a análise de tópicos automaticamente
             extrairTopicosRobustos(texto);
           },
           error: function(err) {
-             console.error(err);
-             $('#texto-transcrito').text('Erro ao transcrever. Verifique se o link é um MP3 válido e acessível.');
+             console.error("Erro na transcrição:", err);
+             $('#texto-transcrito').text('Erro ao transcrever: ' + (err.responseJSON?.error || 'Verifique o link ou as chaves da API.'));
              $botao.text('Tentar Novamente').prop('disabled', false);
           }
         });
@@ -188,13 +191,10 @@
       // --- 2. EXTRAÇÃO DE TÓPICOS (Chama api/chat.js) ---
       function extrairTopicosRobustos(texto) {
         $('#container-topicos').fadeIn();
-        $('#lista-topicos').html('<p style="color:white; text-align:center;">IA lendo a transcrição e identificando temas...</p>');
-
-        // Limitamos o texto para não estourar o limite da API (aprox 15k caracteres)
-        const textoLimitado = texto.substring(0, 15000);
+        $('#lista-topicos').html('<p style="color:white; text-align:center;">IA identificando temas e criando resumos prévios...</p>');
 
         $.ajax({
-          url: '/api/chat', // <--- MUDANÇA: Usa a API genérica de chat
+          url: '/api/chat',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           data: JSON.stringify({
@@ -203,15 +203,14 @@
               content: "Analyze the transcript and identify 7 main topics. Ignore topics about the hosts of the podcast and about Alura. For each topic: 1. Title (Professional). 2. A robust summary (one paragraph, 3-5 sentences) with relevant info. Return ONLY a JSON array: [{\"title\": \"...\", \"summary\": \"...\"}]"
             }, { 
               role: "user", 
-              content: "Transcript: " + textoLimitado
+              content: "Transcript: " + texto.substring(0, 15000) 
             }],
             temperature: 0.3
           }),
           success: function(response) {
             try {
-              // A API devolve o texto na propriedade 'content'
               const content = response.content;
-              const cleanJson = content.replace(/```json|```/g, ''); // Limpa formatação Markdown se houver
+              const cleanJson = content.replace(/```json|```/g, ''); 
               const topicos = JSON.parse(cleanJson);
               
               let html = '';
@@ -231,30 +230,25 @@
               });
               $('#lista-topicos').html(html);
             } catch (e) { 
-                console.error(e);
-                $('#lista-topicos').text('Erro ao processar estrutura dos tópicos.'); 
+                $('#lista-topicos').text('Erro ao processar tópicos.'); 
             }
-          },
-          error: function() {
-              $('#lista-topicos').text('Erro de comunicação com a IA.');
           }
         });
       }
 
-      // --- 3. RELATÓRIO FINAL (Chama api/chat.js novamente) ---
+      // --- 3. RELATÓRIO FINAL (Chama api/chat.js) ---
       $('#btn-gerar-resumo-final').on('click', function() {
         const selecionados = [];
         $("input[name='podcast-topic']:checked").each(function() { selecionados.push($(this).val()); });
-        
         if (selecionados.length === 0) return alert("Por favor, selecione pelo menos um tópico!");
 
         const $btn = $(this);
-        $btn.text('IA Escrevendo Relatório...').prop('disabled', true);
+        $btn.text('IA Gerando Relatório Técnico...').prop('disabled', true);
         $('#resumo-wrapper').fadeIn();
-        $('#resultado-resumo').html('Gerando análises técnicas para os tópicos selecionados...');
+        $('#resultado-resumo').html('Processando seções independentes...');
 
         $.ajax({
-          url: '/api/chat', // <--- MUDANÇA: Usa a mesma API genérica
+          url: '/api/chat',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           data: JSON.stringify({
@@ -267,38 +261,29 @@
               You are an expert News Curator for Computer Science students and AI Engineers.
               Your goal is to provide a comprehensive technical analysis.
 
-              For EACH provided article below, output a structured report:
-              ### [INSERT TITLE HERE]
-              ** [Insert a high-level summary (2 to 3 lines)] ** - [Detailed Bullet 1] 
+              For EACH topic, output a structured report:
+              ### [TITLE]
+              ** [Summary (2-3 lines)] ** - [Detailed Bullet 1] 
               - [Detailed Bullet 2] 
               - [Detailed Bullet 3] 
 
-              #### RULES: #### 
-              1. **Depth over Brevity:** Each bullet point must be substantial.
-              2. **Technical Focus:** Explain implications and technologies.
-              3. **Formatting:** Use simple HTML (<b> for bold, <br> for break lines). Separate articles with <hr>.
+              Formatting: Use <b> for bold and <br> for break lines. Separate articles with <hr>.
 
-              ## TRANSCRIPT TO ANALYZE: ##
-              ${$('#texto-transcrito').text().substring(0, 20000)}` // Envia o texto (com limite de segurança)
+              ## TRANSCRIPT ##
+              ${$('#texto-transcrito').text().substring(0, 20000)}`
             }],
             temperature: 0.2
           }),
           success: function(response) {
-            // A API devolve o texto na propriedade 'content'
             const resumoFinal = response.content.replace(/\n/g, '<br>');
             $('#resultado-resumo').html(resumoFinal);
-            
             $btn.text('Gerar Relatório Individualizado').prop('disabled', false);
             $('html, body').animate({ scrollTop: $("#resumo-wrapper").offset().top - 50 }, 600);
-          },
-          error: function() {
-             $('#resultado-resumo').html('Erro ao gerar relatório. Tente selecionar menos tópicos.');
-             $btn.text('Tentar Novamente').prop('disabled', false);
           }
         });
       });
 
-      // --- FUNÇÕES DE VISUAL (Não mudam) ---
+      // --- AUXILIARES ---
       $('#toggle-transcricao').on('click', function() {
         const container = $('#resultado-container');
         container.toggleClass('collapsed expanded');
@@ -313,7 +298,6 @@
           setTimeout(() => $(this).text('Copiar'), 2000);
         });
       });
-
     });
   </script>
 </body>

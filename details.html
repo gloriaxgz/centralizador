@@ -54,6 +54,15 @@
         </div>
       </div>
 
+      <div class="col-lg-12 text-center" style="margin-bottom: 40px;">
+        <div class="main-button">
+          <a href="javascript:void(0)" id="btn-refresh-news" style="background-color: #00ffcc; border-color: #00ffcc; color: #333; font-weight: bold; padding: 10px 25px;">
+             Atualizar Notícias Agora
+          </a>
+        </div>
+        <p id="refresh-status" style="color: #00ffcc; font-size: 12px; margin-top: 10px; display: none;">Sincronizando com GNews e atualizando banco global...</p>
+      </div>
+
       <div class="col-lg-12" id="news-feed-container">
         <h5 class="text-center" style="color:white;padding:50px;">Buscando as notícias mais recentes no banco...</h5>
       </div>
@@ -100,10 +109,16 @@
   });
 
   // ================= CARREGAMENTO VIA API + KV =================
-  async function carregarNoticiasGlobais() {
+  async function carregarNoticiasGlobais(force = false) {
     try {
-      // Puxa as notícias centralizadas da sua nova API /api/news
-      const response = await fetch('/api/news');
+      if(force) {
+        $('#refresh-status').fadeIn();
+      }
+
+      // Adiciona o parâmetro ?force=true se o botão foi clicado
+      const url = force ? '/api/news?force=true' : '/api/news';
+      
+      const response = await fetch(url);
       const articles = await response.json();
 
       if (!articles || articles.length === 0) {
@@ -111,8 +126,13 @@
         return;
       }
 
-      // Agrupa as notícias por data (para manter os carrosséis separados)
+      // Limpa o estado atual para nova renderização
       newsByDate = {};
+      displayedDatesCount = 0;
+      selectedArticles = [];
+      $('#count').text('0');
+      $('#btn-generate-report').hide();
+
       articles.forEach(art => {
         const dt = new Date(art.publishedAt);
         const dateKey = dt.toLocaleDateString('pt-BR');
@@ -120,17 +140,28 @@
         newsByDate[dateKey].push(art);
       });
 
-      // Limpa o container e renderiza o primeiro lote
       $('#news-feed-container').empty();
       renderNextBatch();
+      $('#refresh-status').fadeOut();
 
     } catch (e) {
       console.error('Erro ao carregar notícias:', e);
       $('#news-feed-container').html('<h5 class="text-center" style="color:#ff6b6b;padding:50px;">Erro ao sincronizar com o banco de dados central.</h5>');
+      $('#refresh-status').fadeOut();
     }
   }
 
-  // ================= RENDERIZAÇÃO EM LOTES (PAGINAÇÃO) =================
+  // ================= EVENTO DO BOTÃO ATUALIZAR =================
+  $('#btn-refresh-news').on('click', async function() {
+    const $btn = $(this);
+    $btn.css('pointer-events', 'none').css('opacity', '0.5').text('⏳ Atualizando...');
+    
+    await carregarNoticiasGlobais(true);
+    
+    $btn.css('pointer-events', 'auto').css('opacity', '1').text('🔄 Atualizar Notícias Agora');
+  });
+
+  // ================= RENDERIZAÇÃO EM LOTES =================
   async function renderNextBatch() {
     const container = $('#news-feed-container');
     const sortedDates = getSortedDates();
@@ -160,7 +191,6 @@
     syncLoadMoreButton();
   }
 
-  // ================= AUXILIARES DE INTERFACE =================
   function initOwlCarousel($el) {
     $el.owlCarousel({
       items: 3, margin: 30, dots: false, nav: true,
@@ -171,7 +201,6 @@
 
   async function buildCards(articles) {
     let html = '';
-    // Ordena as do dia (mais recentes primeiro)
     articles.sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
     for (const art of articles) {
@@ -286,7 +315,6 @@
   </script>
 
   <style>
-    /* Estilos Rápidos para Seleção */
     .news-item-card { position: relative; transition: all 0.3s; border-radius: 20px; overflow: hidden; background: #282b2f; padding-bottom: 20px; }
     .news-item-card.selected { border: 2px solid #7453f8; transform: scale(0.98); }
     .news-checkbox { position: absolute; top: 15px; right: 15px; z-index: 10; width: 20px; height: 20px; cursor: pointer; }

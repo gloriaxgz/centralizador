@@ -81,13 +81,39 @@
         </div>
       </div>
 
+      <!-- ===================== AI REPORT SECTION (NOVO) ===================== -->
       <div class="col-lg-12" id="summary-section" style="display:none;margin-top:60px;">
         <div class="section-heading">
           <div class="line-dec"></div>
           <h2>AI <em>Executive Summary</em></h2>
         </div>
-        <div id="summary-output"></div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="report-tabs" style="display:flex; gap:0; margin-bottom:0;">
+          <button class="report-tab-btn active" data-tab="tab-summary">
+            📋 Resumo Executivo
+          </button>
+          <button class="report-tab-btn" data-tab="tab-relevance">
+            🏢 Por que é relevante para a Radix?
+          </button>
+        </div>
+
+        <!-- TAB: RESUMO -->
+        <div id="tab-summary" class="report-tab-content active">
+          <div id="summary-output" class="report-box">
+            <p style="color:#aaa;padding:20px;">⚡ Aguardando geração do relatório...</p>
+          </div>
+        </div>
+
+        <!-- TAB: RELEVÂNCIA RADIX -->
+        <div id="tab-relevance" class="report-tab-content">
+          <div id="relevance-output" class="report-box">
+            <p style="color:#aaa;padding:20px;">⚡ Aguardando análise de relevância...</p>
+          </div>
+        </div>
+
       </div>
+      <!-- ================================================================== -->
 
     </div></div>
   </div>
@@ -111,13 +137,9 @@
   // ================= CARREGAMENTO VIA API + KV =================
   async function carregarNoticiasGlobais(force = false) {
     try {
-      if(force) {
-        $('#refresh-status').fadeIn();
-      }
+      if(force) $('#refresh-status').fadeIn();
 
-      // Adiciona o parâmetro ?force=true se o botão foi clicado
       const url = force ? '/api/news?force=true' : '/api/news';
-      
       const response = await fetch(url);
       const articles = await response.json();
 
@@ -126,7 +148,6 @@
         return;
       }
 
-      // Limpa o estado atual para nova renderização
       newsByDate = {};
       displayedDatesCount = 0;
       selectedArticles = [];
@@ -155,9 +176,7 @@
   $('#btn-refresh-news').on('click', async function() {
     const $btn = $(this);
     $btn.css('pointer-events', 'none').css('opacity', '0.5').text('⏳ Atualizando...');
-    
     await carregarNoticiasGlobais(true);
-    
     $btn.css('pointer-events', 'auto').css('opacity', '1').text('🔄 Atualizar Notícias Agora');
   });
 
@@ -165,7 +184,6 @@
   async function renderNextBatch() {
     const container = $('#news-feed-container');
     const sortedDates = getSortedDates();
-    
     const batch = sortedDates.slice(displayedDatesCount, displayedDatesCount + DATES_PER_LOAD);
 
     for (const date of batch) {
@@ -201,7 +219,6 @@
 
   async function buildCards(articles) {
     let html = '';
-    // Ordena por data (mais recente primeiro)
     articles.sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
     for (const art of articles) {
@@ -221,11 +238,9 @@
             </div>
             <div class="news-content-area">
               <h4>${art.title || 'Sem Título'}</h4>
-              
               <a href="${urlNoticia}" target="_blank" class="source-link" title="Ler no site original">
                 <span class="source-tag">@${source}</span>
               </a>
-
               <p>${art.description || 'Clique para ler a matéria completa.'}</p>
               <div class="tags-list">${tags}</div>
             </div>
@@ -263,7 +278,16 @@
     else $('#load-more-container').show();
   }
 
-  // ================= EVENTOS DE SELEÇÃO E REPORT =================
+  // ================= TROCA DE ABAS =================
+  $(document).on('click', '.report-tab-btn', function() {
+    const target = $(this).data('tab');
+    $('.report-tab-btn').removeClass('active');
+    $('.report-tab-content').removeClass('active');
+    $(this).addClass('active');
+    $(`#${target}`).addClass('active');
+  });
+
+  // ================= EVENTOS DE SELEÇÃO =================
   $(document).on('change', '.news-checkbox', function() {
     const card = $(this).closest('.news-item-card');
     const data = { title: $(this).data('title'), desc: $(this).data('desc'), source: $(this).data('source') };
@@ -283,44 +307,102 @@
 
   $('#btn-load-more').on('click', () => renderNextBatch());
 
+  // ================= GERAÇÃO DO REPORT COM DUAS ABAS =================
   $('#btn-generate-report').on('click', function() {
     const $btn = $(this);
     $btn.text('🤖 AI ANALYZING...').css('pointer-events','none');
-    
-    $('#summary-section').fadeIn();
-    $('#summary-output').html('<p style="color:white;padding:20px;">⚡ Processando relatório executivo...</p>');
 
+    // Mostra a seção e ativa a primeira aba
+    $('#summary-section').fadeIn();
+    $('.report-tab-btn[data-tab="tab-summary"]').trigger('click');
+
+    // Loading nas duas abas
+    $('#summary-output').html('<div class="report-loading"><span class="report-spinner"></span> Gerando resumo executivo...</div>');
+    $('#relevance-output').html('<div class="report-loading"><span class="report-spinner"></span> Analisando relevância para a Radix...</div>');
+
+    $('html,body').animate({ scrollTop: $('#summary-section').offset().top - 80 }, 600);
+
+    // Monta o input de artigos
     let articlesInput = "";
-    selectedArticles.forEach((art, index) => {
-        articlesInput += `\nARTICLE ${index+1}: ${art.title}\nCONTENT: ${art.desc}\n`;
+    selectedArticles.forEach((art, i) => {
+      articlesInput += `\nARTIGO ${i+1}:\nTítulo: ${art.title}\nDescrição: ${art.desc}\nFonte: ${art.source}\n`;
     });
 
-    $.ajax({
+    // ---- CHAMADA 1: Resumo Executivo ----
+    const callSummary = $.ajax({
       url: '/api/chat',
       method: 'POST',
-      headers: { 'Content-Type':'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       data: JSON.stringify({
         messages: [
-            { role: 'system', content: 'You are a tech curator. Summarize these articles with technical depth using HTML tags like <b> and <br>.' },
-            { role: 'user', content: articlesInput }
+          {
+            role: 'system',
+            content: 'Você é um curador de tecnologia. Analise os artigos fornecidos e gere um resumo executivo aprofundado em português, com profundidade técnica. Use tags HTML como <b>, <br> e <ul><li> para formatar bem o conteúdo.'
+          },
+          { role: 'user', content: articlesInput }
         ],
         temperature: 0.3
-      }),
-      success: res => {
-        const text = res.content.replace(/\n/g,'<br>');
-        $('#summary-output').html(`<div style="color:#eee;font-size:15px;line-height:1.8;text-align:left;padding:30px;background:#1e1e1e;border-radius:20px;border:1px solid #333;">${text}</div>`);
+      })
+    });
+
+    // ---- CHAMADA 2: Relevância para a Radix ----
+    const RADIX_CONTEXT = `
+A Radix é uma empresa brasileira de engenharia e tecnologia com atuação nas seguintes frentes:
+- Oil & Gas: projetos de automação, controle, instrumentação e digital twin para indústria de petróleo e gás (Petrobras e outras operadoras);
+- Indústria 4.0 e Manufatura: implementação de MES, SCADA, IIoT, integração OT/IT e automação industrial;
+- Engenharia de Software e Sistemas: desenvolvimento de plataformas digitais, sistemas embarcados e soluções customizadas;
+- Data & Analytics / IA: modelos preditivos, dashboards industriais, machine learning aplicado a ativos industriais e processos;
+- Segurança e Infraestrutura: cibersegurança industrial (OT/IT), cloud, redes e compliance.
+A apresentação quinzenal de notícias tem como objetivo identificar tendências, riscos e oportunidades que impactam diretamente os setores e projetos em que a Radix atua.`;
+
+    const callRelevance = $.ajax({
+      url: '/api/chat',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: `Você é um analista estratégico especializado em tecnologia e negócios industriais. 
+${RADIX_CONTEXT}
+
+Sua tarefa é analisar os artigos fornecidos e explicar, de forma estratégica e objetiva em português, POR QUE cada notícia é relevante para a Radix. Para cada artigo, indique:
+1. Qual(is) setor(es) da Radix são mais impactados (ex: Oil & Gas, Indústria 4.0, Data & IA, etc.)
+2. O impacto concreto: oportunidade de negócio, risco, tendência que afeta projetos em andamento, ou tecnologia que pode ser incorporada
+3. Uma recomendação curta: o que a equipe deveria monitorar ou considerar
+
+Use tags HTML para formatar: <b> para destaques, <br> para quebras, e uma estrutura clara por artigo. Seja direto e estratégico — este conteúdo será usado em uma apresentação executiva quinzenal.`
+          },
+          { role: 'user', content: articlesInput }
+        ],
+        temperature: 0.4
+      })
+    });
+
+    // ---- Aguarda as duas chamadas ----
+    $.when(callSummary, callRelevance).then(
+      // Sucesso das duas
+      function(resSummary, resRelevance) {
+        const summaryText = resSummary[0].content.replace(/\n/g, '<br>');
+        const relevanceText = resRelevance[0].content.replace(/\n/g, '<br>');
+
+        $('#summary-output').html(`<div class="report-content">${summaryText}</div>`);
+        $('#relevance-output').html(`<div class="report-content">${relevanceText}</div>`);
+
         $btn.text(`✨ Generate AI Report (Selected: ${selectedArticles.length})`).css('pointer-events','auto');
-        $('html,body').animate({ scrollTop:$('#summary-section').offset().top - 80 }, 800);
       },
-      error: () => {
-        $('#summary-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar relatório. Tente novamente.</p>');
+      // Erro em qualquer uma
+      function() {
+        $('#summary-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar resumo. Tente novamente.</p>');
+        $('#relevance-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar análise. Tente novamente.</p>');
         $btn.text('✨ Generate AI Report').css('pointer-events','auto');
       }
-    });
+    );
   });
   </script>
 
   <style>
+    /* ── Cards ── */
     .news-item-card { position: relative; transition: all 0.3s; border-radius: 20px; overflow: hidden; background: #282b2f; padding-bottom: 20px; }
     .news-item-card.selected { border: 2px solid #7453f8; transform: scale(0.98); }
     .news-checkbox { position: absolute; top: 15px; right: 15px; z-index: 10; width: 20px; height: 20px; cursor: pointer; }
@@ -330,9 +412,87 @@
     .source-tag { font-size: 12px; color: #7453f8; display: block; margin-bottom: 10px; }
     .news-content-area p { font-size: 14px; color: #afafaf; height: 60px; overflow: hidden; }
     .date-section-header { border-left: 4px solid #7453f8; padding-left: 15px; margin-top: 30px; }
+
+    /* ── Report Tabs ── */
+    .report-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 2px solid #333;
+    }
+    .report-tab-btn {
+      background: #1a1a1a;
+      color: #aaa;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      letter-spacing: 0.3px;
+      margin-bottom: -2px;
+    }
+    .report-tab-btn:hover {
+      color: #fff;
+      background: #242424;
+    }
+    .report-tab-btn.active {
+      color: #fff;
+      background: #1e1e1e;
+      border-bottom: 3px solid #7453f8;
+    }
+    .report-tab-btn[data-tab="tab-relevance"].active {
+      border-bottom-color: #00ffcc;
+      color: #00ffcc;
+    }
+
+    /* ── Tab Content ── */
+    .report-tab-content {
+      display: none;
+    }
+    .report-tab-content.active {
+      display: block;
+    }
+
+    /* ── Report Box ── */
+    .report-box {
+      color: #eee;
+      font-size: 15px;
+      line-height: 1.85;
+      text-align: left;
+      padding: 30px 35px;
+      background: #1e1e1e;
+      border-radius: 0 0 20px 20px;
+      border: 1px solid #333;
+      border-top: none;
+      min-height: 160px;
+    }
+    .report-content b { color: #c5b7ff; }
+    #tab-relevance .report-content b { color: #00ffcc; }
+
+    /* ── Loading spinner ── */
+    .report-loading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #888;
+      padding: 20px 0;
+      font-size: 14px;
+    }
+    .report-spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid #444;
+      border-top-color: #7453f8;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    #tab-relevance .report-spinner { border-top-color: #00ffcc; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 
 </body>
-
 </html>
-

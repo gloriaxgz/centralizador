@@ -40,8 +40,8 @@
 
   <div class="page-heading normal-space">
     <div class="container"><div class="row"><div class="col-lg-12">
-      <h2>Daily Tech News Curator</h2>
-      <p style="color: #7453f8; font-weight: bold;">Sincronizado com Banco de Dados Global</p>
+      <h2>News Radar</h2>
+      <p style="color: #a2ff0c; font-weight: bold;">Leia e analise notícias relacionadas à tecnologia e IA</p>
     </div></div></div>
   </div>
 
@@ -51,7 +51,7 @@
       <div class="col-lg-12">
         <div class="section-heading">
           <div class="line-dec"></div>
-          <h2>Tech <em>Intelligence Radar</em></h2>
+          <h3>As notícias são atualizadas automaticamente de hora em hora.</h3>
         </div>
       </div>
 
@@ -78,7 +78,7 @@
           <div class="main-button">
             <a href="javascript:void(0)" id="btn-generate-report"
                style="display:none;background-color:#7453f8;border-color:#7453f8;padding:15px 30px;">
-              ✨ Generate AI Report (Selected: <span id="count">0</span>)
+               Gerar resumo com IA (Selected: <span id="count">0</span>)
             </a>
           </div>
           <a href="javascript:void(0)" id="btn-send-to-board"
@@ -86,7 +86,7 @@
                     background:transparent; border:2px solid #00ffcc;
                     color:#00ffcc; font-size:14px; font-weight:700;
                     cursor:pointer; text-decoration:none; transition:all .2s;">
-            📋 Enviar para Newsboard (<span id="count-board">0</span>)
+            Enviar para Newsboard (<span id="count-board">0</span>)
           </a>
         </div>
       </div>
@@ -101,24 +101,24 @@
         <!-- TAB NAVIGATION -->
         <div class="report-tabs" style="display:flex; gap:0; margin-bottom:0;">
           <button class="report-tab-btn active" data-tab="tab-summary">
-            📋 Resumo Executivo
+            Resumo Executivo
           </button>
           <button class="report-tab-btn" data-tab="tab-relevance">
-            🏢 Por que é relevante para a Radix?
+            Por que é relevante para a Radix?
           </button>
         </div>
 
         <!-- TAB: RESUMO -->
         <div id="tab-summary" class="report-tab-content active">
           <div id="summary-output" class="report-box">
-            <p style="color:#aaa;padding:20px;">⚡ Aguardando geração do relatório...</p>
+            <p style="color:#aaa;padding:20px;">Aguardando geração do relatório...</p>
           </div>
         </div>
 
         <!-- TAB: RELEVÂNCIA RADIX -->
         <div id="tab-relevance" class="report-tab-content">
           <div id="relevance-output" class="report-box">
-            <p style="color:#aaa;padding:20px;">⚡ Aguardando análise de relevância...</p>
+            <p style="color:#aaa;padding:20px;">Aguardando análise de relevância...</p>
           </div>
         </div>
 
@@ -354,7 +354,7 @@
       });
 
       const orig = $btn.html();
-      $btn.html('✓ Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
+      $btn.html('Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
       setTimeout(() => {
         $btn.html(orig).css('background','transparent').css('pointer-events','auto');
       }, 2200);
@@ -371,7 +371,7 @@
   // ================= GERAÇÃO DO REPORT COM DUAS ABAS =================
   $('#btn-generate-report').on('click', function() {
     const $btn = $(this);
-    $btn.text('🤖 AI ANALYZING...').css('pointer-events','none');
+    $btn.text('Aguarde...').css('pointer-events','none');
 
     // Mostra a seção e ativa a primeira aba
     $('#summary-section').fadeIn();
@@ -450,13 +450,13 @@ Use tags HTML para formatar: <b> para destaques, <br> para quebras, e uma estrut
         $('#summary-output').html(`<div class="report-content">${summaryText}</div>`);
         $('#relevance-output').html(`<div class="report-content">${relevanceText}</div>`);
 
-        $btn.text(`✨ Generate AI Report (Selected: ${selectedArticles.length})`).css('pointer-events','auto');
+        $btn.text(` Generate AI Report (Selected: ${selectedArticles.length})`).css('pointer-events','auto');
       },
       // Erro em qualquer uma
       function() {
         $('#summary-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar resumo. Tente novamente.</p>');
         $('#relevance-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar análise. Tente novamente.</p>');
-        $btn.text('✨ Generate AI Report').css('pointer-events','auto');
+        $btn.text(' Generate AI Report').css('pointer-events','auto');
       }
     );
   });

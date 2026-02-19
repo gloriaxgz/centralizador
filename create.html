@@ -347,7 +347,7 @@ ${$('#texto-transcrito').text().substring(0, 20000)}`
         showToast(`${selecionados.length} tópico${selecionados.length > 1 ? 's' : ''} enviado${selecionados.length > 1 ? 's' : ''} para o Newsboard ✓`);
         $btn.html('✓ Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
         setTimeout(() => {
-          $btn.html('📋 Enviar Tópicos para Newsboard')
+          $btn.html(' Enviar Tópicos para Newsboard')
               .css('background','transparent')
               .css('pointer-events','auto');
         }, 2500);
@@ -373,7 +373,7 @@ ${$('#texto-transcrito').text().substring(0, 20000)}`
         ? '#texto-transcrito'
         : '#resultado-resumo';
       navigator.clipboard.writeText($(target).text()).then(() => {
-        $(this).text('✅ Copiado!');
+        $(this).text(' Copiado!');
         setTimeout(() => $(this).text('Copiar'), 2000);
       });
     });

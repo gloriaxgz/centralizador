@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <title>Newsboard — Radix</title>
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
+  
+</head>
+<body>
+  <header class="header-area header-sticky">
+    <div class="container"><div class="row"><div class="col-12">
+      <nav class="main-nav">
+        <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Radix"></a>
+        <ul class="nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="create.html">Transcritor de Podcast</a></li>
+          <li><a href="details.html">News Radar</a></li>
+          <li><a href="table.html" class="active">Newsboard</a></li>
+        </ul>
+        <a class='menu-trigger'><span>Menu</span></a>
+      </nav>
+    </div></div></div>
+  </header>
+
+  <div class="container">
+    <div class="board-header">
+      <h1>News<span>board</span></h1>
+      <p>Tabela editorial da apresentação quinzenal · Radix Intelligence</p>
+      <div id="sync-status"></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn-tool primary" id="btn-add-row"><span>+</span> Nova linha</button>
+      <button class="btn-tool accent" id="btn-import">
+        ↓ Importar do Radar
+        <span id="import-badge">0</span>
+      </button>
+      <button class="btn-tool" id="btn-legend-toggle">◈ Legenda de Cores</button>
+      <button class="btn-tool" id="btn-copy-md">⎘ Copiar como Markdown</button>
+      <button class="btn-tool danger" id="btn-clear-all">✕ Limpar Tudo</button>
+    </div>
+
+    <div class="legend-panel" id="legend-panel">
+      <h3>Legenda de Cores</h3>
+      <div class="legend-grid" id="legend-grid"></div>
+    </div>
+
+    <div class="table-wrapper">
+      <div id="table-loading"><div class="spinner"></div> Carregando dados do servidor…</div>
+      <table class="newsboard" id="newsboard-table">
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-color">Cor</th>
+            <th class="col-title">Título</th>
+            <th class="col-link">Link</th>
+            <th class="col-source">Fonte</th>
+            <th class="col-tags">Tags</th>
+            <th class="col-notes">Notas</th>
+            <th class="col-del"></th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <button class="add-row-btn" id="btn-add-row-bottom">
+        <span style="font-size:16px;">+</span> Adicionar linha
+      </button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/custom.js"></script>
+  <script>
+  const PALETTE = [
+    '#2d1f4e','#1e3a2f','#3a1e1e','#1e2e3a','#2e2a14',
+    '#4a2060','#0f3030','#3a2010','#1a1a2e','#252020',
+  ];
+
+  let rows = [], legendLabels = {}, saveTimer = null;
+
+  // ── API ──────────────────────────────────────────────────────
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
+  async function loadFromServer() {
+    const data = await apiFetch('/api/newsboard');
+    rows         = data.rows   || [];
+    legendLabels = data.legend || {};
+    if (rows.length === 0) rows = [makeRow(), makeRow(), makeRow()];
+  }
+
+  function scheduleSave() {
+    setSyncStatus('saving', '● Salvando…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try {
+        await apiFetch('/api/newsboard', {
+          method: 'POST',
+          body: JSON.stringify({ rows, legend: legendLabels }),
+        });
+        setSyncStatus('saved', '✓ Salvo no servidor');
+        setTimeout(() => setSyncStatus('', ''), 3000);
+      } catch(e) {
+        setSyncStatus('error', '✕ Erro ao salvar — tente novamente');
+      }
+    }, 800);
+  }
+
+  async function fetchPending() {
+    try {
+      const pending = await apiFetch('/api/newsboard?action=pending');
+      const badge = document.getElementById('import-badge');
+      if (pending.length > 0) {
+        badge.textContent = pending.length;
+        badge.classList.add('visible');
+      } else {
+        badge.classList.remove('visible');
+      }
+    } catch(e) {}
+  }
+
+  // ── STATUS ───────────────────────────────────────────────────
+  function setSyncStatus(cls, msg) {
+    const el = document.getElementById('sync-status');
+    el.className = cls;
+    el.textContent = msg;
+  }
+
+  // ── INIT ─────────────────────────────────────────────────────
+  async function init() {
+    try {
+      await loadFromServer();
+    } catch(e) {
+      setSyncStatus('error', '✕ Não foi possível conectar ao servidor');
+      rows = [makeRow(), makeRow(), makeRow()];
+    }
+    renderLegend();
+    renderAllRows();
+    document.getElementById('table-loading').classList.add('hidden');
+    await fetchPending();
+    setInterval(fetchPending, 5000);
+  }
+  init();
+
+  // ── ROW MODEL ────────────────────────────────────────────────
+  let _id = Date.now();
+  function makeRow(data = {}) {
+    return {
+      id:     data.id     || String(++_id),
+      color:  data.color  || '',
+      title:  data.title  || '',
+      link:   data.link   || '',
+      source: data.source || '',
+      tags:   data.tags   || '',
+      notes:  data.notes  || '',
+    };
+  }
+
+  // ── RENDER ───────────────────────────────────────────────────
+  function renderAllRows() {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = '';
+    rows.forEach((row, idx) => tbody.appendChild(buildRowEl(row, idx)));
+  }
+
+  function buildRowEl(row, idx) {
+    const tr = document.createElement('tr');
+    tr.dataset.id = row.id;
+    if (row.color) tr.style.backgroundColor = row.color + '66';
+    tr.innerHTML = `
+      <td class="num-cell">${idx + 1}</td>
+      <td class="color-cell">
+        <div class="color-dot ${row.color ? 'active' : ''}"
+             style="${row.color ? 'background:' + row.color : ''}"
+             data-id="${row.id}"></div>
+        <div class="color-picker-popup" id="picker-${row.id}">
+          <div class="color-swatches">
+            ${PALETTE.map(hex => `<div class="swatch-btn ${row.color===hex?'selected':''}" style="background:${hex}" data-hex="${hex}" data-id="${row.id}" title="${escHtml(legendLabels[hex]||hex)}"></div>`).join('')}
+          </div>
+          <button class="clear-color-btn" data-id="${row.id}">Sem cor</button>
+        </div>
+      </td>
+      <td><input type="text" class="cell-input" placeholder="Título da notícia…" value="${escHtml(row.title)}" data-field="title" data-id="${row.id}"></td>
+      <td class="link-cell"><input type="text" class="cell-input" placeholder="https://…" value="${escHtml(row.link)}" data-field="link" data-id="${row.id}"></td>
+      <td><input type="text" class="cell-input" placeholder="Fonte" value="${escHtml(row.source)}" data-field="source" data-id="${row.id}"></td>
+      <td class="tags-cell"><input type="text" class="cell-input" placeholder="AI, OT…" value="${escHtml(row.tags)}" data-field="tags" data-id="${row.id}"></td>
+      <td><input type="text" class="cell-input" placeholder="Observações…" value="${escHtml(row.notes)}" data-field="notes" data-id="${row.id}"></td>
+      <td class="del-cell"><button class="del-btn" data-id="${row.id}" title="Remover">✕</button></td>
+    `;
+    return tr;
+  }
+
+  function refreshRowNumbers() {
+    document.querySelectorAll('#table-body tr').forEach((tr, i) => {
+      const c = tr.querySelector('.num-cell');
+      if (c) c.textContent = i + 1;
+    });
+  }
+
+  function renderLegend() {
+    document.getElementById('legend-grid').innerHTML = PALETTE.map(hex => `
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:${hex}"></div>
+        <input type="text" class="legend-label" placeholder="Sem rótulo"
+               value="${escHtml(legendLabels[hex]||'')}" data-hex="${hex}">
+      </div>`).join('');
+  }
+
+  // ── EVENTS ───────────────────────────────────────────────────
+  document.getElementById('table-body').addEventListener('input', function(e) {
+    if (!e.target.classList.contains('cell-input')) return;
+    const row = rows.find(r => r.id === e.target.dataset.id);
+    if (row) { row[e.target.dataset.field] = e.target.value; scheduleSave(); }
+  });
+
+  document.getElementById('table-body').addEventListener('click', function(e) {
+    if (e.target.classList.contains('color-dot')) {
+      const id = e.target.dataset.id;
+      const popup = document.getElementById('picker-' + id);
+      const isOpen = popup.classList.contains('open');
+      closeAllPickers();
+      if (!isOpen) { popup.classList.add('open'); e.stopPropagation(); }
+      return;
+    }
+    if (e.target.classList.contains('swatch-btn')) {
+      applyColor(e.target.dataset.id, e.target.dataset.hex); closeAllPickers(); return;
+    }
+    if (e.target.classList.contains('clear-color-btn')) {
+      applyColor(e.target.dataset.id, ''); closeAllPickers(); return;
+    }
+    if (e.target.classList.contains('del-btn')) {
+      const id = e.target.dataset.id;
+      rows = rows.filter(r => r.id !== id);
+      document.querySelector(`tr[data-id="${id}"]`)?.remove();
+      refreshRowNumbers(); scheduleSave(); return;
+    }
+  });
+
+  document.addEventListener('click', e => { if (!e.target.closest('.color-cell')) closeAllPickers(); });
+
+  function closeAllPickers() {
+    document.querySelectorAll('.color-picker-popup.open').forEach(p => p.classList.remove('open'));
+  }
+
+  function applyColor(id, hex) {
+    const row = rows.find(r => r.id === id);
+    if (!row) return;
+    row.color = hex;
+    const tr = document.querySelector(`tr[data-id="${id}"]`);
+    if (tr) {
+      tr.style.backgroundColor = hex ? hex + '66' : '';
+      const dot = tr.querySelector('.color-dot');
+      if (dot) { dot.style.background = hex || ''; dot.classList.toggle('active', !!hex); }
+      tr.querySelectorAll('.swatch-btn').forEach(s => s.classList.toggle('selected', s.dataset.hex === hex));
+    }
+    scheduleSave();
+  }
+
+  document.getElementById('legend-grid').addEventListener('input', function(e) {
+    if (e.target.classList.contains('legend-label')) {
+      legendLabels[e.target.dataset.hex] = e.target.value;
+      scheduleSave();
+    }
+  });
+
+  function addRow() {
+    const row = makeRow();
+    rows.push(row);
+    const tr = buildRowEl(row, rows.length - 1);
+    document.getElementById('table-body').appendChild(tr);
+    refreshRowNumbers(); scheduleSave();
+    tr.querySelector('.cell-input').focus();
+  }
+  document.getElementById('btn-add-row').addEventListener('click', addRow);
+  document.getElementById('btn-add-row-bottom').addEventListener('click', addRow);
+
+  document.getElementById('btn-legend-toggle').addEventListener('click', () =>
+    document.getElementById('legend-panel').classList.toggle('open'));
+
+  document.getElementById('btn-clear-all').addEventListener('click', async () => {
+    if (!confirm('Tem certeza? Todas as linhas serão removidas do servidor.')) return;
+    rows = [makeRow(), makeRow(), makeRow()];
+    renderAllRows(); scheduleSave(); showToast('Tabela limpa.');
+  });
+
+  document.getElementById('btn-copy-md').addEventListener('click', () => {
+    let md = '| # | Título | Link | Fonte | Tags | Notas |\n|---|--------|------|-------|------|-------|\n';
+    rows.forEach((r, i) => {
+      if (!r.title && !r.link) return;
+      md += `| ${i+1} | ${r.title} | ${r.link} | ${r.source} | ${r.tags} | ${r.notes} |\n`;
+    });
+    navigator.clipboard.writeText(md).then(() => showToast('Copiado como Markdown ✓'));
+  });
+
+  document.getElementById('btn-import').addEventListener('click', async function() {
+    this.disabled = true;
+    try {
+      const pending = await apiFetch('/api/newsboard?action=pending');
+      if (!pending || pending.length === 0) {
+        showToast('Nenhuma notícia pendente no Radar.', '#f39c12');
+        this.disabled = false; return;
+      }
+      const tbody = document.getElementById('table-body');
+      pending.forEach(art => {
+        const row = makeRow({ title: art.title||'', link: art.url||'', source: art.source||'', tags: art.tags||'' });
+        rows.push(row);
+        const tr = buildRowEl(row, rows.length - 1);
+        tr.classList.add('just-imported');
+        tbody.appendChild(tr);
+      });
+      refreshRowNumbers(); scheduleSave();
+      await apiFetch('/api/newsboard?action=pending', { method: 'DELETE' });
+      document.getElementById('import-badge').classList.remove('visible');
+      showToast(`${pending.length} notícia${pending.length>1?'s':''} importada${pending.length>1?'s':''} ✓`);
+    } catch(e) {
+      showToast('Erro ao importar do servidor.', '#ff4d6d');
+    }
+    this.disabled = false;
+  });
+
+  // ── TOAST ────────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg, color) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderColor = color || 'var(--cyan)';
+    t.style.color = color || 'var(--cyan)';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function escHtml(str) {
+    return (str||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  </script>
+</body>
+</html>

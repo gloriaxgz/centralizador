@@ -30,6 +30,7 @@
             <li><a href="index.html">Home</a></li>
             <li><a href="create.html">Transcritor de Podcast</a></li>
             <li><a href="details.html" class="active">News Radar</a></li>
+            <li><a href="table.html">Newsboard</a></li>
           </ul>
           <a class='menu-trigger'><span>Menu</span></a>
         </nav>
@@ -73,10 +74,19 @@
             <a href="javascript:void(0)" id="btn-load-more">Mostrar dias anteriores</a>
           </div>
         </div>
-        <div class="main-button" style="margin-top:30px;">
-          <a href="javascript:void(0)" id="btn-generate-report"
-             style="display:none;background-color:#7453f8;border-color:#7453f8;padding:15px 30px;">
-            ✨ Generate AI Report (Selected: <span id="count">0</span>)
+        <div style="margin-top:30px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap; align-items:center;">
+          <div class="main-button">
+            <a href="javascript:void(0)" id="btn-generate-report"
+               style="display:none;background-color:#7453f8;border-color:#7453f8;padding:15px 30px;">
+              ✨ Generate AI Report (Selected: <span id="count">0</span>)
+            </a>
+          </div>
+          <a href="javascript:void(0)" id="btn-send-to-board"
+             style="display:none; padding:15px 30px; border-radius:40px;
+                    background:transparent; border:2px solid #00ffcc;
+                    color:#00ffcc; font-size:14px; font-weight:700;
+                    cursor:pointer; text-decoration:none; transition:all .2s;">
+            📋 Enviar para Newsboard (<span id="count-board">0</span>)
           </a>
         </div>
       </div>
@@ -232,7 +242,10 @@
       html += `
         <div class="item">
           <div class="news-item-card">
-            <input type="checkbox" class="news-checkbox" data-title="${title}" data-desc="${desc}" data-source="${source}">
+            <input type="checkbox" class="news-checkbox"
+                   data-title="${title}" data-desc="${desc}"
+                   data-source="${source}" data-url="${urlNoticia}"
+                   data-tags="${tags.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim()}">
             <div class="news-image-container">
               <img src="${img}" alt="News" loading="lazy" onerror="this.src='assets/images/current-01.jpg'">
             </div>
@@ -290,8 +303,14 @@
   // ================= EVENTOS DE SELEÇÃO =================
   $(document).on('change', '.news-checkbox', function() {
     const card = $(this).closest('.news-item-card');
-    const data = { title: $(this).data('title'), desc: $(this).data('desc'), source: $(this).data('source') };
-    
+    const data = {
+      title:  $(this).data('title'),
+      desc:   $(this).data('desc'),
+      source: $(this).data('source'),
+      url:    $(this).data('url'),
+      tags:   $(this).data('tags'),
+    };
+
     if (this.checked) {
       card.addClass('selected');
       selectedArticles.push(data);
@@ -299,10 +318,52 @@
       card.removeClass('selected');
       selectedArticles = selectedArticles.filter(a => a.title !== data.title);
     }
-    
-    $('#count').text(selectedArticles.length);
-    if (selectedArticles.length > 0) $('#btn-generate-report').fadeIn();
-    else $('#btn-generate-report').fadeOut();
+
+    const n = selectedArticles.length;
+    $('#count').text(n);
+    $('#count-board').text(n);
+
+    if (n > 0) {
+      $('#btn-generate-report').fadeIn();
+      $('#btn-send-to-board').fadeIn().css('display','inline-flex');
+    } else {
+      $('#btn-generate-report').fadeOut();
+      $('#btn-send-to-board').fadeOut();
+    }
+  });
+
+  // ================= ENVIAR PARA NEWSBOARD =================
+  $('#btn-send-to-board').on('click', async function() {
+    if (selectedArticles.length === 0) return;
+
+    const $btn = $(this);
+    $btn.css('pointer-events','none').css('opacity','0.6');
+
+    const articles = selectedArticles.map(a => ({
+      title:  a.title  || '',
+      url:    a.url    || '',
+      source: a.source || '',
+      tags:   a.tags   || '',
+    }));
+
+    try {
+      await fetch('/api/newsboard?action=pending', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articles }),
+      });
+
+      const orig = $btn.html();
+      $btn.html('✓ Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
+      setTimeout(() => {
+        $btn.html(orig).css('background','transparent').css('pointer-events','auto');
+      }, 2200);
+
+      window.open('table.html', '_blank');
+    } catch(e) {
+      $btn.css('pointer-events','auto').css('opacity','1');
+      alert('Erro ao enviar para o servidor. Tente novamente.');
+    }
   });
 
   $('#btn-load-more').on('click', () => renderNextBatch());

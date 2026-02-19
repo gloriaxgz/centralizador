@@ -6,17 +6,13 @@
   <meta name="author" content="templatemo">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
-
   <title>Transcritor de Podcasts</title>
-
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
   <link rel="stylesheet" href="assets/css/fontawesome.css">
   <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
   <link rel="stylesheet" href="assets/css/owl.css">
   <link rel="stylesheet" href="assets/css/animate.css">
   <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
-
 </head>
 
 <body>
@@ -24,119 +20,137 @@
   <div id="js-preloader" class="js-preloader">
     <div class="preloader-inner">
       <span class="dot"></span>
-      <div class="dots">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+      <div class="dots"><span></span><span></span><span></span></div>
     </div>
   </div>
 
   <header class="header-area header-sticky">
     <div class="container">
-      <div class="row">
-        <div class="col-12">
-          <nav class="main-nav">
-            <a href="index.html" class="logo">
-              <img src="assets/images/logo.png" alt="">
-            </a>
-            <ul class="nav">
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="create.html" class="active">Transcritor de Podcast</a></li>
-                        <li><a href="details.html">News Radar</a></li>
-            </ul>
-            <a class='menu-trigger'><span>Menu</span></a>
-          </nav>
-        </div>
-      </div>
+      <div class="row"><div class="col-12">
+        <nav class="main-nav">
+          <a href="index.html" class="logo"><img src="assets/images/logo.png" alt=""></a>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="create.html" class="active">Transcritor de Podcast</a></li>
+            <li><a href="details.html">News Radar</a></li>
+            <li><a href="table.html">Newsboard</a></li>
+          </ul>
+          <a class='menu-trigger'><span>Menu</span></a>
+        </nav>
+      </div></div>
     </div>
   </header>
 
   <div class="page-heading normal-space">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <h2>Transcritor de Podcasts</h2>
-        </div>
-      </div>
-    </div>
+    <div class="container"><div class="row"><div class="col-lg-12">
+      <h2>Transcritor de Podcasts</h2>
+    </div></div></div>
   </div>
 
   <div class="item-details-page">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="section-heading">
-            <div class="line-dec"></div>
-            <h2>Cole o link do episódio abaixo</h2>
-            <p>Caso queira encontrar algum link de episódio, clique <a href="https://www.listennotes.com/">aqui</a>.</p>
-          </div>
-        </div>
-        <div class="col-lg-12">
-          <form id="transcription-form">
-            <div class="row">
-              <div class="col-lg-12">
-                <fieldset>
-                  <label for="audio-url">Link Direto do Áudio (.mp3)</label>
-                  <input type="text" id="audio-url" placeholder="https://exemplo.com/audio.mp3" required 
-                         style="background-color: #37393c; color: white; border: none; padding: 15px; border-radius: 20px; width: 100%; margin-bottom: 20px;">
-                </fieldset>
-              </div>
-              <div class="col-lg-12">
-                <fieldset>
-                  <button type="submit" id="form-submit" class="orange-button">Iniciar Transcrição</button>
-                </fieldset>
-              </div>
-            </div>
-          </form>
-        </div>
+    <div class="container"><div class="row">
 
-        <div class="col-lg-12" id="section-resultados" style="margin-top: 50px; display:none;">
-          
-          <div class="section-heading">
-            <div class="line-dec"></div>
-            <h2>Sua <em>Transcrição</em></h2>
-          </div>
-          
-          <div class="action-buttons">
-            <button class="btn-toggle" id="toggle-transcricao">▼ Expandir Texto</button>
-            <button class="btn-copy" id="copy-transcricao">Copiar Transcrição</button>
-          </div>
-
-          <div id="resultado-container" class="collapsed" style="background: #282b2f; padding: 30px; border-radius: 20px; color: white; border: 1px solid #444;">
-            <p id="texto-transcrito"></p>
-          </div>
-
-          <div id="container-topicos" style="display:none; margin-top: 50px;">
-            <div class="section-heading">
-              <div class="line-dec"></div>
-              <h2>O que deseja <em>Resumir?</em></h2>
-            </div>
-            
-            <div id="lista-topicos" class="topic-selection-card">
-              <p style="color: white; text-align: center;">Analisando assuntos e gerando prévias robustas...</p>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-              <button id="btn-gerar-resumo-final" class="orange-button" style="background-color: #275b68; border-color: #ffffff;"> Gerar Relatório Individualizado</button>
-            </div>
-          </div>
-
-          <div id="resumo-wrapper" style="display:none; margin-top: 50px;">
-            <div class="section-heading">
-              <div class="line-dec"></div>
-              <h2>Relatório <em>Executivo por Tópico</em></h2>
-            </div>
-            <div class="action-buttons">
-                <button class="btn-copy" id="copy-resumo">Copiar Relatório Completo</button>
-            </div>
-            <div id="resultado-resumo" style="text-align: left; background: #1f2124; padding: 40px; border-radius: 20px; border: 1px dashed #5d3cf2; color: #ddd;">
-                </div>
-          </div>
-
+      <div class="col-lg-12">
+        <div class="section-heading">
+          <div class="line-dec"></div>
+          <h2>Cole o link do episódio abaixo</h2>
+          <p>Caso queira encontrar algum link de episódio, clique <a href="https://www.listennotes.com/">aqui</a>.</p>
         </div>
       </div>
-    </div>
+
+      <div class="col-lg-12">
+        <form id="transcription-form">
+          <div class="row">
+            <div class="col-lg-12">
+              <fieldset>
+                <label for="audio-url">Link Direto do Áudio (.mp3)</label>
+                <input type="text" id="audio-url" placeholder="https://exemplo.com/audio.mp3" required
+                       style="background-color:#37393c;color:white;border:none;padding:15px;border-radius:20px;width:100%;margin-bottom:20px;">
+              </fieldset>
+            </div>
+            <div class="col-lg-12">
+              <fieldset>
+                <button type="submit" id="form-submit" class="orange-button">Iniciar Transcrição</button>
+              </fieldset>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ─── RESULTS ─── -->
+      <div class="col-lg-12" id="section-resultados" style="margin-top:50px;display:none;">
+
+        <div class="section-heading">
+          <div class="line-dec"></div>
+          <h2>Sua <em>Transcrição</em></h2>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-toggle" id="toggle-transcricao">▼ Expandir Texto</button>
+          <button class="btn-copy" id="copy-transcricao">Copiar Transcrição</button>
+        </div>
+
+        <div id="resultado-container" class="collapsed"
+             style="background:#282b2f;padding:30px;border-radius:20px;color:white;border:1px solid #444;">
+          <p id="texto-transcrito"></p>
+        </div>
+
+        <!-- ─── TOPICS ─── -->
+        <div id="container-topicos" style="display:none;margin-top:50px;">
+          <div class="section-heading">
+            <div class="line-dec"></div>
+            <h2>O que deseja <em>Resumir?</em></h2>
+          </div>
+
+          <div id="lista-topicos" class="topic-selection-card">
+            <p style="color:white;text-align:center;">Analisando assuntos e gerando prévias robustas...</p>
+          </div>
+
+          <!-- Topic action buttons -->
+          <div style="text-align:center;margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;align-items:center;">
+            <button id="btn-gerar-resumo-final" class="orange-button"
+                    style="background-color:#275b68;border-color:#ffffff;">
+              Gerar Relatório Individualizado
+            </button>
+
+            <!-- NOVO: Enviar para Newsboard -->
+            <a href="javascript:void(0)" id="btn-send-to-board"
+               style="display:inline-flex;align-items:center;gap:8px;
+                      padding:15px 30px;border-radius:40px;
+                      background:transparent;border:2px solid #00ffcc;
+                      color:#00ffcc;font-size:14px;font-weight:700;
+                      cursor:pointer;text-decoration:none;transition:all .2s;">
+              📋 Enviar Tópicos para Newsboard
+            </a>
+          </div>
+        </div>
+
+        <!-- ─── FINAL REPORT ─── -->
+        <div id="resumo-wrapper" style="display:none;margin-top:50px;">
+          <div class="section-heading">
+            <div class="line-dec"></div>
+            <h2>Relatório <em>Executivo por Tópico</em></h2>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-copy" id="copy-resumo">Copiar Relatório Completo</button>
+          </div>
+          <div id="resultado-resumo"
+               style="text-align:left;background:#1f2124;padding:40px;border-radius:20px;border:1px dashed #5d3cf2;color:#ddd;">
+          </div>
+        </div>
+
+      </div>
+      <!-- ─── /RESULTS ─── -->
+
+    </div></div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="podcast-toast"
+       style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
+              background:#1c1e24;border:1px solid #00ffcc;color:#00ffcc;
+              font-size:13px;font-weight:700;padding:12px 24px;border-radius:40px;
+              opacity:0;pointer-events:none;transition:all .3s;z-index:9999;white-space:nowrap;">
   </div>
 
   <script src="vendor/jquery/jquery.min.js"></script>
@@ -148,157 +162,223 @@
   <script src="assets/js/custom.js"></script>
 
   <script>
-    $(document).ready(function() {
-      // --- 1. TRANSCRIÇÃO (Chama api/transcribe.js) ---
-      $('#transcription-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        // Captura o valor do input de forma segura e remove espaços extras
-        const linkAudio = $('#audio-url').val().trim(); 
+  $(document).ready(function() {
 
-        if (!linkAudio) {
-          alert("Por favor, insira uma URL válida.");
-          return;
+    // ── TOAST ──────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, color) {
+      const t = document.getElementById('podcast-toast');
+      t.textContent = msg;
+      t.style.borderColor = color || '#00ffcc';
+      t.style.color       = color || '#00ffcc';
+      t.style.opacity     = '1';
+      t.style.transform   = 'translateX(-50%) translateY(0)';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        t.style.opacity   = '0';
+        t.style.transform = 'translateX(-50%) translateY(20px)';
+      }, 3000);
+    }
+
+    // ── 1. TRANSCRIÇÃO ─────────────────────────────────────────
+    $('#transcription-form').on('submit', function(e) {
+      e.preventDefault();
+      const linkAudio = $('#audio-url').val().trim();
+      if (!linkAudio) { alert('Por favor, insira uma URL válida.'); return; }
+
+      const $botao = $('#form-submit');
+      $botao.text('Transcrevendo... (Isso pode demorar)').prop('disabled', true);
+
+      $('#section-resultados').fadeIn();
+      $('#texto-transcrito').text('A IA está ouvindo o áudio agora...');
+      $('#container-topicos, #resumo-wrapper').hide();
+
+      $.ajax({
+        url: '/api/transcribe',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify({ audioUrl: linkAudio }),
+        success: function(response) {
+          const texto = response.transcript;
+          $('#texto-transcrito').text(texto);
+          $botao.text('Iniciar Nova Transcrição').prop('disabled', false);
+          extrairTopicosRobustos(texto);
+        },
+        error: function(err) {
+          console.error('Erro na transcrição:', err);
+          $('#texto-transcrito').text('Erro ao transcrever: ' + (err.responseJSON?.error || 'Verifique o link ou as chaves da API.'));
+          $botao.text('Tentar Novamente').prop('disabled', false);
         }
-
-        const $botao = $('#form-submit');
-        $botao.text('Transcrevendo... (Isso pode demorar)').prop('disabled', true);
-        
-        $('#section-resultados').fadeIn();
-        $('#texto-transcrito').text('A IA está ouvindo o áudio agora...');
-        $('#container-topicos, #resumo-wrapper').hide();
-
-        $.ajax({
-          url: '/api/transcribe',
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          // CORREÇÃO: O backend espera 'audioUrl'
-          data: JSON.stringify({ audioUrl: linkAudio }), 
-          success: function(response) {
-            const texto = response.transcript;
-            $('#texto-transcrito').text(texto);
-            $botao.text('Iniciar Nova Transcrição').prop('disabled', false);
-            extrairTopicosRobustos(texto);
-          },
-          error: function(err) {
-             console.error("Erro na transcrição:", err);
-             $('#texto-transcrito').text('Erro ao transcrever: ' + (err.responseJSON?.error || 'Verifique o link ou as chaves da API.'));
-             $botao.text('Tentar Novamente').prop('disabled', false);
-          }
-        });
-      });
-
-      // --- 2. EXTRAÇÃO DE TÓPICOS (Chama api/chat.js) ---
-      function extrairTopicosRobustos(texto) {
-        $('#container-topicos').fadeIn();
-        $('#lista-topicos').html('<p style="color:white; text-align:center;">IA identificando temas e criando resumos prévios...</p>');
-
-        $.ajax({
-          url: '/api/chat',
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          data: JSON.stringify({
-            messages: [{
-              role: "system",
-              content: "Analyze the transcript and identify 7 main topics. Ignore topics about the hosts of the podcast and about Alura. For each topic: 1. Title (Professional). 2. A robust summary (one paragraph, 3-5 sentences) with relevant info. Return ONLY a JSON array: [{\"title\": \"...\", \"summary\": \"...\"}]"
-            }, { 
-              role: "user", 
-              content: "Transcript: " + texto.substring(0, 15000) 
-            }],
-            temperature: 0.3
-          }),
-          success: function(response) {
-            try {
-              const content = response.content;
-              const cleanJson = content.replace(/```json|```/g, ''); 
-              const topicos = JSON.parse(cleanJson);
-              
-              let html = '';
-              topicos.forEach(t => {
-                const searchLink = `https://www.google.com/search?q=${encodeURIComponent(t.title)}+news+ai+tech&tbm=nws`;
-                html += `
-                  <label class="topic-item">
-                    <input type="checkbox" name="podcast-topic" value="${t.title}" checked>
-                    <div class="topic-content">
-                        <span class="topic-title">${t.title}</span>
-                        <span class="topic-desc">${t.summary}</span>
-                        <a href="${searchLink}" target="_blank" class="news-link">
-                           <i class="fa fa-external-link"></i> Ver notícias relacionadas
-                        </a>
-                    </div>
-                  </label>`;
-              });
-              $('#lista-topicos').html(html);
-            } catch (e) { 
-                $('#lista-topicos').text('Erro ao processar tópicos.'); 
-            }
-          }
-        });
-      }
-
-      // --- 3. RELATÓRIO FINAL (Chama api/chat.js) ---
-      $('#btn-gerar-resumo-final').on('click', function() {
-        const selecionados = [];
-        $("input[name='podcast-topic']:checked").each(function() { selecionados.push($(this).val()); });
-        if (selecionados.length === 0) return alert("Por favor, selecione pelo menos um tópico!");
-
-        const $btn = $(this);
-        $btn.text('IA Gerando Relatório Técnico...').prop('disabled', true);
-        $('#resumo-wrapper').fadeIn();
-        $('#resultado-resumo').html('Processando seções independentes...');
-
-        $.ajax({
-          url: '/api/chat',
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          data: JSON.stringify({
-            messages: [{
-              role: "user",
-              content: `Summarize the following podcast transcript. 
-              IMPORTANT: Create a SEPARATE section for EACH of the following selected topics: ${selecionados.join(", ")}.
-
-              ## Remember: ## 
-              You are an expert News Curator for Computer Science students and AI Engineers.
-              Your goal is to provide a comprehensive technical analysis.
-
-              For EACH topic, output a structured report:
-              ### [TITLE]
-              ** [Summary (2-3 lines)] ** - [Detailed Bullet 1] 
-              - [Detailed Bullet 2] 
-              - [Detailed Bullet 3] 
-
-              Formatting: Use <b> for bold and <br> for break lines. Separate articles with <hr>.
-
-              ## TRANSCRIPT ##
-              ${$('#texto-transcrito').text().substring(0, 20000)}`
-            }],
-            temperature: 0.2
-          }),
-          success: function(response) {
-            const resumoFinal = response.content.replace(/\n/g, '<br>');
-            $('#resultado-resumo').html(resumoFinal);
-            $btn.text('Gerar Relatório Individualizado').prop('disabled', false);
-            $('html, body').animate({ scrollTop: $("#resumo-wrapper").offset().top - 50 }, 600);
-          }
-        });
-      });
-
-      // --- AUXILIARES ---
-      $('#toggle-transcricao').on('click', function() {
-        const container = $('#resultado-container');
-        container.toggleClass('collapsed expanded');
-        $(this).text(container.hasClass('expanded') ? '▲ Recolher Texto' : '▼ Expandir Texto');
-      });
-
-      $('.btn-copy').on('click', function() {
-        const target = $(this).attr('id') === 'copy-transcricao' ? '#texto-transcrito' : '#resultado-resumo';
-        const textToCopy = $(target).text();
-        navigator.clipboard.writeText(textToCopy).then(() => {
-          $(this).text('✅ Copiado!');
-          setTimeout(() => $(this).text('Copiar'), 2000);
-        });
       });
     });
+
+    // ── 2. EXTRAÇÃO DE TÓPICOS ─────────────────────────────────
+    function extrairTopicosRobustos(texto) {
+      $('#container-topicos').fadeIn();
+      $('#lista-topicos').html('<p style="color:white;text-align:center;">IA identificando temas e criando resumos prévios...</p>');
+
+      $.ajax({
+        url: '/api/chat',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify({
+          messages: [{
+            role: 'system',
+            content: 'Analyze the transcript and identify 7 main topics. Ignore topics about the hosts of the podcast and about Alura. For each topic: 1. Title (Professional). 2. A robust summary (one paragraph, 3-5 sentences) with relevant info. Return ONLY a JSON array: [{"title": "...", "summary": "..."}]'
+          }, {
+            role: 'user',
+            content: 'Transcript: ' + texto.substring(0, 15000)
+          }],
+          temperature: 0.3
+        }),
+        success: function(response) {
+          try {
+            const content   = response.content;
+            const cleanJson = content.replace(/```json|```/g, '');
+            const topicos   = JSON.parse(cleanJson);
+
+            let html = '';
+            topicos.forEach(t => {
+              const searchLink = `https://www.google.com/search?q=${encodeURIComponent(t.title)}+news+ai+tech&tbm=nws`;
+              html += `
+                <label class="topic-item">
+                  <input type="checkbox" name="podcast-topic"
+                         value="${t.title}"
+                         data-summary="${t.summary.replace(/"/g,'&quot;')}">
+                  <div class="topic-content">
+                    <span class="topic-title">${t.title}</span>
+                    <span class="topic-desc">${t.summary}</span>
+                    <a href="${searchLink}" target="_blank" class="news-link">
+                      <i class="fa fa-external-link"></i> Ver notícias relacionadas
+                    </a>
+                  </div>
+                </label>`;
+            });
+            $('#lista-topicos').html(html);
+
+          } catch(e) {
+            $('#lista-topicos').text('Erro ao processar tópicos.');
+          }
+        }
+      });
+    }
+
+    // ── 3. RELATÓRIO FINAL ─────────────────────────────────────
+    $('#btn-gerar-resumo-final').on('click', function() {
+      const selecionados = [];
+      $("input[name='podcast-topic']:checked").each(function() {
+        selecionados.push($(this).val());
+      });
+      if (selecionados.length === 0) {
+        return alert('Por favor, selecione pelo menos um tópico!');
+      }
+
+      const $btn = $(this);
+      $btn.text('IA Gerando Relatório Técnico...').prop('disabled', true);
+      $('#resumo-wrapper').fadeIn();
+      $('#resultado-resumo').html('Processando seções independentes...');
+
+      $.ajax({
+        url: '/api/chat',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify({
+          messages: [{
+            role: 'user',
+            content: `Summarize the following podcast transcript. 
+IMPORTANT: Create a SEPARATE section for EACH of the following selected topics: ${selecionados.join(', ')}.
+
+## Remember: ## 
+You are an expert News Curator for Computer Science students and AI Engineers.
+Your goal is to provide a comprehensive technical analysis.
+
+For EACH topic, output a structured report:
+### [TITLE]
+** [Summary (2-3 lines)] ** - [Detailed Bullet 1] 
+- [Detailed Bullet 2] 
+- [Detailed Bullet 3] 
+
+Formatting: Use <b> for bold and <br> for break lines. Separate articles with <hr>.
+
+## TRANSCRIPT ##
+${$('#texto-transcrito').text().substring(0, 20000)}`
+          }],
+          temperature: 0.2
+        }),
+        success: function(response) {
+          const resumoFinal = response.content.replace(/\n/g, '<br>');
+          $('#resultado-resumo').html(resumoFinal);
+          $btn.text('Gerar Relatório Individualizado').prop('disabled', false);
+          $('html,body').animate({ scrollTop: $('#resumo-wrapper').offset().top - 50 }, 600);
+        }
+      });
+    });
+
+    // ── 4. ENVIAR TÓPICOS SELECIONADOS PARA NEWSBOARD ──────────
+    $('#btn-send-to-board').on('click', async function() {
+      const selecionados = [];
+      $("input[name='podcast-topic']:checked").each(function() {
+        selecionados.push({
+          title:  $(this).val(),
+          // summary vai para o campo "notas" do Newsboard
+          notes:  $(this).data('summary') || '',
+          source: 'Podcast',
+          url:    '',
+          tags:   'Podcast',
+        });
+      });
+
+      if (selecionados.length === 0) {
+        return alert('Selecione pelo menos um tópico antes de enviar.');
+      }
+
+      const $btn = $(this);
+      $btn.css('pointer-events','none').css('opacity','0.6');
+
+      try {
+        const res = await fetch('/api/newsboard?action=pending', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ articles: selecionados }),
+        });
+
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        showToast(`${selecionados.length} tópico${selecionados.length > 1 ? 's' : ''} enviado${selecionados.length > 1 ? 's' : ''} para o Newsboard ✓`);
+        $btn.html('✓ Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
+        setTimeout(() => {
+          $btn.html('📋 Enviar Tópicos para Newsboard')
+              .css('background','transparent')
+              .css('pointer-events','auto');
+        }, 2500);
+
+        // Abre Newsboard em nova aba
+        window.open('table.html', '_blank');
+
+      } catch(e) {
+        showToast('Erro ao enviar para o servidor.', '#ff4d6d');
+        $btn.css('pointer-events','auto').css('opacity','1');
+      }
+    });
+
+    // ── AUXILIARES ─────────────────────────────────────────────
+    $('#toggle-transcricao').on('click', function() {
+      const container = $('#resultado-container');
+      container.toggleClass('collapsed expanded');
+      $(this).text(container.hasClass('expanded') ? '▲ Recolher Texto' : '▼ Expandir Texto');
+    });
+
+    $('.btn-copy').on('click', function() {
+      const target = $(this).attr('id') === 'copy-transcricao'
+        ? '#texto-transcrito'
+        : '#resultado-resumo';
+      navigator.clipboard.writeText($(target).text()).then(() => {
+        $(this).text('✅ Copiado!');
+        setTimeout(() => $(this).text('Copiar'), 2000);
+      });
+    });
+
+  });
   </script>
 </body>
 </html>

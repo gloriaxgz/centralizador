@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="author" content="templatemo">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
-  <title>News Radar - Centralizado</title>
-  
+  <title>News Radar · Radix</title>
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/fontawesome.css">
   <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
   <link rel="stylesheet" href="assets/css/owl.css">
   <link rel="stylesheet" href="assets/css/animate.css">
-  <link rel="stylesheet" href="assets/css/news-carousel.css">
+  <link rel="stylesheet" href="assets/css/app.css">
 </head>
-
 <body>
 
   <div id="js-preloader" class="js-preloader">
@@ -25,14 +22,15 @@
     <div class="container">
       <div class="row"><div class="col-12">
         <nav class="main-nav">
-          <a href="index.html" class="logo"><img src="assets/images/logo.png" alt=""></a>
+          <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Radix"></a>
           <ul class="nav">
             <li><a href="index.html">Home</a></li>
             <li><a href="create.html">Transcritor de Podcast</a></li>
             <li><a href="details.html" class="active">News Radar</a></li>
+            <li><a href="podcast.html">Podcast Radar</a></li>
             <li><a href="table.html">Newsboard</a></li>
           </ul>
-          <a class='menu-trigger'><span>Menu</span></a>
+          <a class="menu-trigger"><span>Menu</span></a>
         </nav>
       </div></div>
     </div>
@@ -41,7 +39,7 @@
   <div class="page-heading normal-space">
     <div class="container"><div class="row"><div class="col-lg-12">
       <h2>News Radar</h2>
-      <p style="color: #a2ff0c; font-weight: bold;">Leia e analise notícias relacionadas à tecnologia e IA</p>
+      <p style="color:#a2ff0c; font-weight:bold;">Leia e analise notícias relacionadas à tecnologia e IA</p>
     </div></div></div>
   </div>
 
@@ -55,17 +53,17 @@
         </div>
       </div>
 
-      <div class="col-lg-12 text-center" style="margin-bottom: 40px;">
+      <div class="col-lg-12 text-center" style="margin-bottom:40px;">
         <div class="main-button">
-          <a href="javascript:void(0)" id="btn-refresh-news" style="background-color: #00ffcc; border-color: #00ffcc; color: #333; font-weight: bold; padding: 10px 25px;">
-             Atualizar Notícias Agora
-          </a>
+          <a href="javascript:void(0)" id="btn-refresh-news">Atualizar Notícias Agora</a>
         </div>
-        <p id="refresh-status" style="color: #00ffcc; font-size: 12px; margin-top: 10px; display: none;">Sincronizando com GNews e atualizando banco global...</p>
+        <p id="refresh-status" style="color:var(--cyan); font-size:12px; margin-top:10px; display:none;">
+          Sincronizando com GNews...
+        </p>
       </div>
 
       <div class="col-lg-12" id="news-feed-container">
-        <h5 class="text-center" style="color:white;padding:50px;">Buscando as notícias mais recentes no banco...</h5>
+        <h5 class="text-center" style="color:white; padding:50px;">Buscando as notícias mais recentes no banco...</h5>
       </div>
 
       <div class="col-lg-12 text-center" style="margin-top:30px;">
@@ -76,97 +74,81 @@
         </div>
         <div style="margin-top:30px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap; align-items:center;">
           <div class="main-button">
-            <a href="javascript:void(0)" id="btn-generate-report"
-               style="display:none;background-color:#7453f8;border-color:#7453f8;padding:15px 30px;">
-               Gerar resumo com IA (Selected: <span id="count">0</span>)
+            <a href="javascript:void(0)" id="btn-generate-report" style="display:none; background-color:var(--purple); border-color:var(--purple); padding:15px 30px;">
+              Gerar resumo com IA (<span id="count">0</span>)
             </a>
           </div>
-          <a href="javascript:void(0)" id="btn-send-to-board"
-             style="display:none; padding:15px 30px; border-radius:40px;
-                    background:transparent; border:2px solid #00ffcc;
-                    color:#00ffcc; font-size:14px; font-weight:700;
-                    cursor:pointer; text-decoration:none; transition:all .2s;">
+          <a href="javascript:void(0)" id="btn-send-to-board" class="btn-send-board" style="display:none;">
             Enviar para Newsboard (<span id="count-board">0</span>)
           </a>
         </div>
       </div>
 
-      <!-- ===================== AI REPORT SECTION (NOVO) ===================== -->
-      <div class="col-lg-12" id="summary-section" style="display:none;margin-top:60px;">
-        <div class="section-heading">
+      <!-- Seção de relatório IA -->
+      <div class="col-lg-12" id="summary-section" style="display:none;">
+        <div class="section-heading" style="margin-top:60px;">
           <div class="line-dec"></div>
           <h2>AI <em>Executive Summary</em></h2>
         </div>
 
-        <!-- TAB NAVIGATION -->
-        <div class="report-tabs" style="display:flex; gap:0; margin-bottom:0;">
-          <button class="report-tab-btn active" data-tab="tab-summary">
-            Resumo Executivo
-          </button>
-          <button class="report-tab-btn" data-tab="tab-relevance">
-            Por que é relevante para a Radix?
-          </button>
+        <div class="report-tabs">
+          <button class="report-tab-btn active" data-tab="tab-summary">Resumo Executivo</button>
+          <button class="report-tab-btn" data-tab="tab-relevance">Por que é relevante para a Radix?</button>
         </div>
 
-        <!-- TAB: RESUMO -->
         <div id="tab-summary" class="report-tab-content active">
           <div id="summary-output" class="report-box">
-            <p style="color:#aaa;padding:20px;">Aguardando geração do relatório...</p>
+            <p style="color:#aaa; padding:20px;">Aguardando geração do relatório...</p>
           </div>
         </div>
-
-        <!-- TAB: RELEVÂNCIA RADIX -->
         <div id="tab-relevance" class="report-tab-content">
           <div id="relevance-output" class="report-box">
-            <p style="color:#aaa;padding:20px;">Aguardando análise de relevância...</p>
+            <p style="color:#aaa; padding:20px;">Aguardando análise de relevância...</p>
           </div>
         </div>
-
       </div>
-      <!-- ================================================================== -->
 
     </div></div>
   </div>
 
+  <div id="toast"></div>
+
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
   <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/app.js"></script>
   <script src="assets/js/custom.js"></script>
 
   <script>
-  // ================= ESTADO GLOBAL =================
-  let newsByDate = {};
-  let selectedArticles = [];
-  let displayedDatesCount = 0;
+  // ── Estado global ─────────────────────────────────────────
+  let newsByDate = {}, selectedArticles = [], displayedDatesCount = 0;
   const DATES_PER_LOAD = 2;
 
-  $(document).ready(async () => {
-    await carregarNoticiasGlobais();
+  // Contexto da Radix movido para o backend (api/chat.py)
+  // O frontend envia apenas os artigos — o backend injeta o contexto estratégico.
+
+  $(document).ready(async function () {
+    await carregarNoticias();
   });
 
-  // ================= CARREGAMENTO VIA API + KV =================
-  async function carregarNoticiasGlobais(force = false) {
+  // ── Carregamento ──────────────────────────────────────────
+  async function carregarNoticias(force = false) {
     try {
-      if(force) $('#refresh-status').fadeIn();
-
-      const url = force ? '/api/news?force=true' : '/api/news';
-      const response = await fetch(url);
+      if (force) $('#refresh-status').fadeIn();
+      const response = await fetch(force ? '/api/news?force=true' : '/api/news');
       const articles = await response.json();
 
       if (!articles || articles.length === 0) {
-        $('#news-feed-container').html('<h5 class="text-center" style="color:white;padding:50px;">Nenhuma notícia sincronizada no momento.</h5>');
+        $('#news-feed-container').html('<h5 class="text-center" style="color:white;padding:50px;">Nenhuma notícia disponível no momento.</h5>');
         return;
       }
 
-      newsByDate = {};
-      displayedDatesCount = 0;
-      selectedArticles = [];
-      $('#count').text('0');
-      $('#btn-generate-report').hide();
+      newsByDate = {}; displayedDatesCount = 0; selectedArticles = [];
+      $('#count, #count-board').text('0');
+      $('#btn-generate-report, #btn-send-to-board').hide();
 
       articles.forEach(art => {
-        const dt = new Date(art.publishedAt);
-        const dateKey = dt.toLocaleDateString('pt-BR');
+        const dateKey = new Date(art.publishedAt).toLocaleDateString('pt-BR');
         if (!newsByDate[dateKey]) newsByDate[dateKey] = [];
         newsByDate[dateKey].push(art);
       });
@@ -174,86 +156,74 @@
       $('#news-feed-container').empty();
       renderNextBatch();
       $('#refresh-status').fadeOut();
-
     } catch (e) {
-      console.error('Erro ao carregar notícias:', e);
-      $('#news-feed-container').html('<h5 class="text-center" style="color:#ff6b6b;padding:50px;">Erro ao sincronizar com o banco de dados central.</h5>');
+      console.error(e);
+      $('#news-feed-container').html('<h5 class="text-center" style="color:#ff6b6b;padding:50px;">Erro ao sincronizar com o banco.</h5>');
       $('#refresh-status').fadeOut();
     }
   }
 
-  // ================= EVENTO DO BOTÃO ATUALIZAR =================
-  $('#btn-refresh-news').on('click', async function() {
+  $('#btn-refresh-news').on('click', async function () {
     const $btn = $(this);
-    $btn.css('pointer-events', 'none').css('opacity', '0.5').text('⏳ Atualizando...');
-    await carregarNoticiasGlobais(true);
-    $btn.css('pointer-events', 'auto').css('opacity', '1').text('🔄 Atualizar Notícias Agora');
+    $btn.css({ 'pointer-events': 'none', opacity: '0.5' }).text('⏳ Atualizando...');
+    await carregarNoticias(true);
+    $btn.css({ 'pointer-events': 'auto', opacity: '1' }).text('Atualizar Notícias Agora');
   });
 
-  // ================= RENDERIZAÇÃO EM LOTES =================
+  // ── Renderização em lotes ─────────────────────────────────
   async function renderNextBatch() {
-    const container = $('#news-feed-container');
     const sortedDates = getSortedDates();
     const batch = sortedDates.slice(displayedDatesCount, displayedDatesCount + DATES_PER_LOAD);
 
     for (const date of batch) {
-      const safeId = `carousel-${date.replace(/\//g,'-')}`;
+      const safeId   = `carousel-${date.replace(/\//g, '-')}`;
       const articles = newsByDate[date];
       const cardsHtml = await buildCards(articles);
 
-      const sectionHtml = `
+      $('#news-feed-container').append(`
         <div class="carousel-date-row" style="margin-bottom:50px;">
           <h4 class="date-section-header" style="color:#fff; margin-bottom:20px; font-size:20px;">
-            📅 ${date} <span style="font-size:14px; color:#7453f8;">(${articles.length} notícias)</span>
+            📅 ${date} <span style="font-size:14px; color:var(--purple);">(${articles.length} notícias)</span>
           </h4>
-          <div id="${safeId}" class="owl-carousel owl-theme news-carousel">
-            ${cardsHtml}
-          </div>
-        </div>`;
-      
-      container.append(sectionHtml);
-      initOwlCarousel($(`#${safeId}`));
+          <div id="${safeId}" class="owl-carousel owl-theme news-carousel">${cardsHtml}</div>
+        </div>`);
+
+      $(`#${safeId}`).owlCarousel({
+        items: 3, margin: 30, dots: false, nav: true,
+        navText: ["<i class='fa fa-chevron-left'></i>", "<i class='fa fa-chevron-right'></i>"],
+        responsive: { 0: { items: 1 }, 768: { items: 2 }, 1200: { items: 3 } }
+      });
     }
 
     displayedDatesCount += batch.length;
-    syncLoadMoreButton();
-  }
-
-  function initOwlCarousel($el) {
-    $el.owlCarousel({
-      items: 3, margin: 30, dots: false, nav: true,
-      navText: ["<i class='fa fa-chevron-left'></i>", "<i class='fa fa-chevron-right'></i>"],
-      responsive: { 0: { items: 1 }, 768: { items: 2 }, 1200: { items: 3 } }
-    });
+    getSortedDates().length > displayedDatesCount
+      ? $('#load-more-container').show()
+      : $('#load-more-container').hide();
   }
 
   async function buildCards(articles) {
     let html = '';
-    articles.sort((a,b) => new Date(b.publishedAt) - new Date(a.publishedAt));
-
+    articles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
     for (const art of articles) {
-      const tags = generateSmartTags(art.title, art.description);
-      const title = (art.title || 'Sem título').replace(/"/g,'&quot;');
-      const desc = (art.description || 'Sem descrição').replace(/"/g,'&quot;');
-      const img = art.image || 'assets/images/current-01.jpg';
-      const source = art.source?.name || 'News';
-      const urlNoticia = art.url || '#';
-
+      const tags    = generateTags(art.title, art.description);
+      const title   = (art.title       || 'Sem título').replace(/"/g, '&quot;');
+      const desc    = (art.description || '').replace(/"/g, '&quot;');
+      const img     = art.image || 'assets/images/current-01.jpg';
+      const source  = art.source?.name || 'News';
+      const url     = art.url || '#';
       html += `
         <div class="item">
           <div class="news-item-card">
             <input type="checkbox" class="news-checkbox"
                    data-title="${title}" data-desc="${desc}"
-                   data-source="${source}" data-url="${urlNoticia}"
-                   data-tags="${tags.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim()}">
+                   data-source="${source}" data-url="${url}"
+                   data-tags="${tags.replace(/<[^>]+>/g,'').trim()}">
             <div class="news-image-container">
-              <img src="${img}" alt="News" loading="lazy" onerror="this.src='assets/images/current-01.jpg'">
+              <img src="${img}" loading="lazy" onerror="this.src='assets/images/current-01.jpg'" alt="">
             </div>
             <div class="news-content-area">
               <h4>${art.title || 'Sem Título'}</h4>
-              <a href="${urlNoticia}" target="_blank" class="source-link" title="Ler no site original">
-                <span class="source-tag">@${source}</span>
-              </a>
+              <a href="${url}" target="_blank"><span class="source-tag">@${source}</span></a>
               <p>${art.description || 'Clique para ler a matéria completa.'}</p>
               <div class="tags-list">${tags}</div>
             </div>
@@ -263,36 +233,49 @@
     return html;
   }
 
-  function generateSmartTags(title, desc) {
-    const text = (title + " " + desc).toLowerCase();
-    let foundTags = [];
+  function generateTags(title, desc) {
+    const text = (title + ' ' + desc).toLowerCase();
     const taxonomy = {
-      'AI': ['gpt', 'openai', 'gemini', 'generative', 'ia'],
-      'HARDWARE': ['nvidia', 'amd', 'chip', 'gpu'],
-      'CYBER': ['hacker', 'security', 'vulnerability', 'segurança']
+      'AI':     ['gpt','openai','gemini','generative','ia','llm','claude'],
+      'HARDWARE': ['nvidia','amd','chip','gpu','intel'],
+      'CYBER':  ['hacker','security','vulnerability','segurança'],
     };
-    for (const [category, keywords] of Object.entries(taxonomy)) {
-      if (keywords.some(k => text.includes(k))) foundTags.push(category);
-    }
-    if (foundTags.length === 0) foundTags.push('TECH');
-    return foundTags.slice(0, 2).map(t => `<span class="news-tag" style="background:#7453f8; color:white; padding:2px 8px; border-radius:10px; font-size:10px; margin-right:5px;">${t}</span>`).join('');
+    const found = Object.entries(taxonomy)
+      .filter(([, kws]) => kws.some(k => text.includes(k)))
+      .map(([cat]) => cat);
+    return (found.length ? found : ['TECH'])
+      .slice(0, 2)
+      .map(t => `<span class="news-tag">${t}</span>`)
+      .join('');
   }
 
   function getSortedDates() {
-    return Object.keys(newsByDate).sort((a,b) => {
-      const parse = s => { const [d,m,y]=s.split('/'); return new Date(y,m-1,d); };
+    return Object.keys(newsByDate).sort((a, b) => {
+      const parse = s => { const [d,m,y] = s.split('/'); return new Date(y, m-1, d); };
       return parse(b) - parse(a);
     });
   }
 
-  function syncLoadMoreButton() {
-    const total = getSortedDates().length;
-    if (displayedDatesCount >= total) $('#load-more-container').hide();
-    else $('#load-more-container').show();
-  }
+  // ── Seleção de cards ──────────────────────────────────────
+  $(document).on('change', '.news-checkbox', function () {
+    const card = $(this).closest('.news-item-card');
+    const data = { title: $(this).data('title'), desc: $(this).data('desc'), source: $(this).data('source'), url: $(this).data('url'), tags: $(this).data('tags') };
 
-  // ================= TROCA DE ABAS =================
-  $(document).on('click', '.report-tab-btn', function() {
+    if (this.checked) { card.addClass('selected'); selectedArticles.push(data); }
+    else              { card.removeClass('selected'); selectedArticles = selectedArticles.filter(a => a.title !== data.title); }
+
+    const n = selectedArticles.length;
+    $('#count, #count-board').text(n);
+    if (n > 0) {
+      $('#btn-generate-report').fadeIn();
+      $('#btn-send-to-board').fadeIn().css('display', 'inline-flex');
+    } else {
+      $('#btn-generate-report, #btn-send-to-board').fadeOut();
+    }
+  });
+
+  // ── Troca de abas ─────────────────────────────────────────
+  $(document).on('click', '.report-tab-btn', function () {
     const target = $(this).data('tab');
     $('.report-tab-btn').removeClass('active');
     $('.report-tab-content').removeClass('active');
@@ -300,260 +283,79 @@
     $(`#${target}`).addClass('active');
   });
 
-  // ================= EVENTOS DE SELEÇÃO =================
-  $(document).on('change', '.news-checkbox', function() {
-    const card = $(this).closest('.news-item-card');
-    const data = {
-      title:  $(this).data('title'),
-      desc:   $(this).data('desc'),
-      source: $(this).data('source'),
-      url:    $(this).data('url'),
-      tags:   $(this).data('tags'),
-    };
-
-    if (this.checked) {
-      card.addClass('selected');
-      selectedArticles.push(data);
-    } else {
-      card.removeClass('selected');
-      selectedArticles = selectedArticles.filter(a => a.title !== data.title);
-    }
-
-    const n = selectedArticles.length;
-    $('#count').text(n);
-    $('#count-board').text(n);
-
-    if (n > 0) {
-      $('#btn-generate-report').fadeIn();
-      $('#btn-send-to-board').fadeIn().css('display','inline-flex');
-    } else {
-      $('#btn-generate-report').fadeOut();
-      $('#btn-send-to-board').fadeOut();
-    }
-  });
-
-  // ================= ENVIAR PARA NEWSBOARD =================
-  $('#btn-send-to-board').on('click', async function() {
-    if (selectedArticles.length === 0) return;
-
+  // ── Enviar para Newsboard ─────────────────────────────────
+  $('#btn-send-to-board').on('click', async function () {
+    if (!selectedArticles.length) return;
     const $btn = $(this);
-    $btn.css('pointer-events','none').css('opacity','0.6');
-
-    const articles = selectedArticles.map(a => ({
-      title:  a.title  || '',
-      url:    a.url    || '',
-      source: a.source || '',
-      tags:   a.tags   || '',
-    }));
-
+    $btn.css({ 'pointer-events': 'none', opacity: '0.6' });
     try {
       await fetch('/api/newsboard?action=pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articles }),
+        body: JSON.stringify({ articles: selectedArticles.map(a => ({ title: a.title, url: a.url, source: a.source, tags: a.tags })) }),
       });
-
       const orig = $btn.html();
-      $btn.html('Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
-      setTimeout(() => {
-        $btn.html(orig).css('background','transparent').css('pointer-events','auto');
-      }, 2200);
-
+      $btn.html('Enviado! ✓').css({ background: 'var(--cyan-dim)', opacity: '1' });
+      setTimeout(() => $btn.html(orig).css({ background: 'transparent', 'pointer-events': 'auto' }), 2200);
       window.open('table.html', '_blank');
-    } catch(e) {
-      $btn.css('pointer-events','auto').css('opacity','1');
-      alert('Erro ao enviar para o servidor. Tente novamente.');
+    } catch (e) {
+      showToast('Erro ao enviar.', '#ff4d6d');
+      $btn.css({ 'pointer-events': 'auto', opacity: '1' });
     }
   });
 
-  $('#btn-load-more').on('click', () => renderNextBatch());
-
-  // ================= GERAÇÃO DO REPORT COM DUAS ABAS =================
-  $('#btn-generate-report').on('click', function() {
+  // ── Gerar relatório IA ────────────────────────────────────
+  $('#btn-generate-report').on('click', function () {
     const $btn = $(this);
-    $btn.text('Aguarde...').css('pointer-events','none');
+    $btn.text('Aguarde...').css('pointer-events', 'none');
 
-    // Mostra a seção e ativa a primeira aba
     $('#summary-section').fadeIn();
     $('.report-tab-btn[data-tab="tab-summary"]').trigger('click');
-
-    // Loading nas duas abas
     $('#summary-output').html('<div class="report-loading"><span class="report-spinner"></span> Gerando resumo executivo...</div>');
     $('#relevance-output').html('<div class="report-loading"><span class="report-spinner"></span> Analisando relevância para a Radix...</div>');
-
     $('html,body').animate({ scrollTop: $('#summary-section').offset().top - 80 }, 600);
 
-    // Monta o input de artigos
-    let articlesInput = "";
-    selectedArticles.forEach((art, i) => {
-      articlesInput += `\nARTIGO ${i+1}:\nTítulo: ${art.title}\nDescrição: ${art.desc}\nFonte: ${art.source}\n`;
-    });
+    let articlesInput = selectedArticles.map((art, i) =>
+      `\nARTIGO ${i+1}:\nTítulo: ${art.title}\nDescrição: ${art.desc}\nFonte: ${art.source}\n`
+    ).join('');
 
-    // ---- CHAMADA 1: Resumo Executivo ----
     const callSummary = $.ajax({
-      url: '/api/chat',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      url: '/api/chat', method: 'POST', contentType: 'application/json',
       data: JSON.stringify({
         messages: [
-          {
-            role: 'system',
-            content: 'Você é um curador de tecnologia. Analise os artigos fornecidos e gere um resumo executivo aprofundado em português, com profundidade técnica. Use tags HTML como <b>, <br> e <ul><li> para formatar bem o conteúdo.'
-          },
-          { role: 'user', content: articlesInput }
+          { role: 'system', content: 'Você é um curador de tecnologia. Analise os artigos e gere um resumo executivo aprofundado em português. Use tags HTML como <b>, <br> e <ul><li>.' },
+          { role: 'user',   content: articlesInput }
         ],
         temperature: 0.3
       })
     });
 
-    // ---- CHAMADA 2: Relevância para a Radix ----
-    const RADIX_CONTEXT = `
-A Radix é uma empresa brasileira de engenharia e tecnologia com atuação nas seguintes frentes:
-- Oil & Gas: projetos de automação, controle, instrumentação e digital twin para indústria de petróleo e gás (Petrobras e outras operadoras);
-- Indústria 4.0 e Manufatura: implementação de MES, SCADA, IIoT, integração OT/IT e automação industrial;
-- Engenharia de Software e Sistemas: desenvolvimento de plataformas digitais, sistemas embarcados e soluções customizadas;
-- Data & Analytics / IA: modelos preditivos, dashboards industriais, machine learning aplicado a ativos industriais e processos;
-- Segurança e Infraestrutura: cibersegurança industrial (OT/IT), cloud, redes e compliance.
-A apresentação quinzenal de notícias tem como objetivo identificar tendências, riscos e oportunidades que impactam diretamente os setores e projetos em que a Radix atua.`;
-
+    // O contexto da Radix é injetado no backend via variável de ambiente RADIX_CONTEXT
     const callRelevance = $.ajax({
-      url: '/api/chat',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      url: '/api/chat', method: 'POST', contentType: 'application/json',
       data: JSON.stringify({
         messages: [
-          {
-            role: 'system',
-            content: `Você é um analista estratégico especializado em tecnologia e negócios industriais. 
-${RADIX_CONTEXT}
-
-Sua tarefa é analisar os artigos fornecidos e explicar, de forma estratégica e objetiva em português, POR QUE cada notícia é relevante para a Radix. Para cada artigo, indique:
-1. Qual(is) setor(es) da Radix são mais impactados (ex: Oil & Gas, Indústria 4.0, Data & IA, etc.)
-2. O impacto concreto: oportunidade de negócio, risco, tendência que afeta projetos em andamento, ou tecnologia que pode ser incorporada
-3. Uma recomendação curta: o que a equipe deveria monitorar ou considerar
-
-Use tags HTML para formatar: <b> para destaques, <br> para quebras, e uma estrutura clara por artigo. Seja direto e estratégico — este conteúdo será usado em uma apresentação executiva quinzenal.`
-          },
-          { role: 'user', content: articlesInput }
+          { role: 'system', content: 'radix_relevance_analysis' }, // backend substitui pelo prompt completo
+          { role: 'user',   content: articlesInput }
         ],
         temperature: 0.4
       })
     });
 
-    // ---- Aguarda as duas chamadas ----
     $.when(callSummary, callRelevance).then(
-      // Sucesso das duas
-      function(resSummary, resRelevance) {
-        const summaryText = resSummary[0].content.replace(/\n/g, '<br>');
-        const relevanceText = resRelevance[0].content.replace(/\n/g, '<br>');
-
-        $('#summary-output').html(`<div class="report-content">${summaryText}</div>`);
-        $('#relevance-output').html(`<div class="report-content">${relevanceText}</div>`);
-
-        $btn.text(` Generate AI Report (Selected: ${selectedArticles.length})`).css('pointer-events','auto');
+      function (resSummary, resRelevance) {
+        $('#summary-output').html(`<div class="report-content">${resSummary[0].content.replace(/\n/g,'<br>')}</div>`);
+        $('#relevance-output').html(`<div class="report-content">${resRelevance[0].content.replace(/\n/g,'<br>')}</div>`);
+        $btn.text(`Gerar resumo com IA (${selectedArticles.length})`).css('pointer-events', 'auto');
       },
-      // Erro em qualquer uma
-      function() {
-        $('#summary-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar resumo. Tente novamente.</p>');
-        $('#relevance-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar análise. Tente novamente.</p>');
-        $btn.text(' Generate AI Report').css('pointer-events','auto');
+      function () {
+        $('#summary-output, #relevance-output').html('<p style="color:#ff6b6b;padding:20px;">⚠️ Erro ao gerar. Tente novamente.</p>');
+        $btn.text('Gerar resumo com IA').css('pointer-events', 'auto');
       }
     );
   });
+
+  $('#btn-load-more').on('click', () => renderNextBatch());
   </script>
-
-  <style>
-    /* ── Cards ── */
-    .news-item-card { position: relative; transition: all 0.3s; border-radius: 20px; overflow: hidden; background: #282b2f; padding-bottom: 20px; }
-    .news-item-card.selected { border: 2px solid #7453f8; transform: scale(0.98); }
-    .news-checkbox { position: absolute; top: 15px; right: 15px; z-index: 10; width: 20px; height: 20px; cursor: pointer; }
-    .news-image-container img { width: 100%; height: 200px; object-fit: cover; }
-    .news-content-area { padding: 20px; }
-    .news-content-area h4 { font-size: 18px; color: #fff; margin-bottom: 10px; height: 50px; overflow: hidden; }
-    .source-tag { font-size: 12px; color: #7453f8; display: block; margin-bottom: 10px; }
-    .news-content-area p { font-size: 14px; color: #afafaf; height: 60px; overflow: hidden; }
-    .date-section-header { border-left: 4px solid #7453f8; padding-left: 15px; margin-top: 30px; }
-
-    /* ── Report Tabs ── */
-    .report-tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 0;
-      border-bottom: 2px solid #333;
-    }
-    .report-tab-btn {
-      background: #1a1a1a;
-      color: #aaa;
-      border: none;
-      border-bottom: 3px solid transparent;
-      padding: 14px 28px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.25s;
-      letter-spacing: 0.3px;
-      margin-bottom: -2px;
-    }
-    .report-tab-btn:hover {
-      color: #fff;
-      background: #242424;
-    }
-    .report-tab-btn.active {
-      color: #fff;
-      background: #1e1e1e;
-      border-bottom: 3px solid #7453f8;
-    }
-    .report-tab-btn[data-tab="tab-relevance"].active {
-      border-bottom-color: #00ffcc;
-      color: #00ffcc;
-    }
-
-    /* ── Tab Content ── */
-    .report-tab-content {
-      display: none;
-    }
-    .report-tab-content.active {
-      display: block;
-    }
-
-    /* ── Report Box ── */
-    .report-box {
-      color: #eee;
-      font-size: 15px;
-      line-height: 1.85;
-      text-align: left;
-      padding: 30px 35px;
-      background: #1e1e1e;
-      border-radius: 0 0 20px 20px;
-      border: 1px solid #333;
-      border-top: none;
-      min-height: 160px;
-    }
-    .report-content b { color: #c5b7ff; }
-    #tab-relevance .report-content b { color: #00ffcc; }
-
-    /* ── Loading spinner ── */
-    .report-loading {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #888;
-      padding: 20px 0;
-      font-size: 14px;
-    }
-    .report-spinner {
-      width: 18px;
-      height: 18px;
-      border: 3px solid #444;
-      border-top-color: #7453f8;
-      border-radius: 50%;
-      display: inline-block;
-      animation: spin 0.8s linear infinite;
-      flex-shrink: 0;
-    }
-    #tab-relevance .report-spinner { border-top-color: #00ffcc; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
-
 </body>
 </html>

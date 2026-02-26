@@ -3,30 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <title>Podcast Radar</title>
-
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+  <title>Podcast Radar · Radix</title>
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/fontawesome.css">
   <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
   <link rel="stylesheet" href="assets/css/owl.css">
   <link rel="stylesheet" href="assets/css/animate.css">
-
-  
+  <link rel="stylesheet" href="assets/css/app.css">
 </head>
-
 <body>
-  <!-- HEADER -->
+
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
   <header class="header-area header-sticky">
     <div class="container">
       <div class="row"><div class="col-12">
         <nav class="main-nav">
-          <a href="index.html" class="logo">⬡ Radar</a>
+          <a href="index.html" class="logo"><img src="assets/images/logo.png" alt="Radix"></a>
           <ul class="nav">
             <li><a href="index.html">Home</a></li>
             <li><a href="create.html">Transcritor de Podcast</a></li>
             <li><a href="details.html">News Radar</a></li>
-            <li><a href="podcast-radar.html" class="active">Podcast Radar</a></li>
+            <li><a href="podcast.html" class="active">Podcast Radar</a></li>
             <li><a href="table.html">Newsboard</a></li>
           </ul>
           <a class="menu-trigger"><span>Menu</span></a>
@@ -35,7 +39,32 @@
     </div>
   </header>
 
-  <!-- PAGE HEADING -->
+  <!-- Overlay do drawer -->
+  <div id="drawer-overlay"></div>
+
+  <!-- Drawer de episódios -->
+  <div id="episode-drawer">
+    <div class="drawer-header">
+      <img id="drawer-thumb" src="" class="drawer-podcast-thumb" alt="">
+      <div class="drawer-podcast-meta">
+        <div id="drawer-name"   class="drawer-podcast-name">—</div>
+        <div id="drawer-author" class="drawer-podcast-author">—</div>
+      </div>
+      <button class="drawer-close" id="drawer-close-btn" title="Fechar">✕</button>
+    </div>
+    <div class="drawer-search-bar">
+      <input type="text" class="drawer-search" id="ep-filter"
+             placeholder="Filtrar episódios..." oninput="filterEpisodes(this.value)">
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <div class="state-box">
+        <div class="spin"></div>
+        <p style="margin-top:16px; font-size:13px;">Buscando episódios...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo principal -->
   <div class="page-heading normal-space">
     <div class="container"><div class="row"><div class="col-lg-12">
       <h2>Podcast Radar</h2>
@@ -43,41 +72,17 @@
     </div></div></div>
   </div>
 
-  <!-- DRAWER OVERLAY -->
-  <div id="drawer-overlay"></div>
-
-  <!-- EPISODE DRAWER -->
-  <div id="episode-drawer">
-    <div class="drawer-header">
-      <img id="drawer-thumb" src="" class="drawer-podcast-thumb" alt="">
-      <div class="drawer-podcast-meta">
-        <div id="drawer-name" class="drawer-podcast-name">—</div>
-        <div id="drawer-author" class="drawer-podcast-author">—</div>
-      </div>
-      <button class="drawer-close" id="drawer-close-btn" title="Fechar">✕</button>
-    </div>
-    <div class="drawer-search-bar">
-      <input type="text" class="drawer-search" id="ep-filter" placeholder="Filtrar episódios..." oninput="filterEpisodes(this.value)">
-    </div>
-    <div class="drawer-body" id="drawer-body">
-      <div class="state-box" style="padding:40px 20px;">
-        <div class="spin"></div>
-        <p style="margin-top:16px; font-size:13px;">Buscando episódios...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN CONTENT -->
   <div class="item-details-page">
     <div class="container">
 
-      <!-- API CONFIG -->
-      <div class="row" style="padding-top: 50px;">
+      <!-- Config API -->
+      <div class="row" style="padding-top:50px;">
         <div class="col-lg-12">
           <div class="api-config-banner">
             <div>
               <p><span>🔑 Credenciais Podcast Index</span></p>
-              <p style="font-size:12px; margin-top:4px;">Insira sua API Key e Secret do
+              <p style="font-size:12px; margin-top:4px; color:var(--muted);">
+                Insira sua API Key e Secret do
                 <a href="https://podcastindex.org" target="_blank" style="color:var(--amber);">podcastindex.org</a> (gratuito)
               </p>
             </div>
@@ -91,17 +96,17 @@
         </div>
       </div>
 
-      <!-- SEARCH -->
+      <!-- Busca -->
       <div class="row">
-        <div class="col-lg-12 search-area" style="padding-top:0;">
+        <div class="col-lg-12" style="padding-top:0;">
           <div class="section-heading">
             <div class="line-dec"></div>
             <h3>Encontre um Podcast</h3>
           </div>
           <div class="search-wrap">
             <input type="text" class="search-input" id="podcast-search"
-              placeholder="Ex: Lex Fridman, Huberman Lab, Tecnologia..."
-              onkeydown="if(event.key==='Enter') searchPodcasts()">
+                   placeholder="Ex: Lex Fridman, Huberman Lab, Tecnologia..."
+                   onkeydown="if(event.key==='Enter') searchPodcasts()">
             <button class="search-btn" id="search-btn" onclick="searchPodcasts()">Buscar →</button>
           </div>
           <div id="search-status" style="font-size:13px; color:var(--muted); margin-top:14px; min-height:20px;"></div>
@@ -109,7 +114,7 @@
         </div>
       </div>
 
-      <!-- NEWS FEED -->
+      <!-- Feed de links -->
       <div class="row" id="news-feed-section" style="padding-top:20px; display:none;">
         <div class="col-lg-12">
           <hr class="divider">
@@ -124,7 +129,6 @@
             Clique em um episódio na gaveta para extrair os links da descrição.
           </p>
           <div class="debug-panel" id="debug-panel"></div>
-          <div style="margin-bottom:30px;"></div>
           <div id="episodes-content"></div>
         </div>
       </div>
@@ -132,33 +136,26 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div id="toast"></div>
 
-  <!-- VENDOR JS -->
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
   <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/app.js"></script>
   <script src="assets/js/custom.js"></script>
 
   <script>
-  // =========================================================
-  //  STATE
-  // =========================================================
-  let API_KEY     = localStorage.getItem('pi_key')    || '';
-  let API_SECRET  = localStorage.getItem('pi_secret') || '';
-  let allEpisodes    = [];
-  let selectedPodcast = null;
-  let loadedEpisodes  = {};   // epId  -> links[]
-  let episodeCache    = {};   // epId  -> full episode object
+  // ── Estado ────────────────────────────────────────────────
+  let API_KEY    = localStorage.getItem('pi_key')    || '';
+  let API_SECRET = localStorage.getItem('pi_secret') || '';
+  let allEpisodes = [], selectedPodcast = null;
+  let loadedEpisodes = {}, episodeCache = {};
 
   if (API_KEY)    document.getElementById('cfg-key').value    = '••••••';
   if (API_SECRET) document.getElementById('cfg-secret').value = '••••••';
   if (API_KEY && API_SECRET) document.getElementById('cfg-status').textContent = '✓ Credenciais salvas';
 
-  // =========================================================
-  //  DEBUG
-  // =========================================================
+  // ── Debug ─────────────────────────────────────────────────
   function dbg(msg, type) {
     const panel = document.getElementById('debug-panel');
     const d = document.createElement('div');
@@ -166,15 +163,10 @@
     d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
     panel.appendChild(d);
     panel.scrollTop = panel.scrollHeight;
-    console.log('[PodcastRadar]', msg);
   }
-  function toggleDebug() {
-    document.getElementById('debug-panel').classList.toggle('visible');
-  }
+  function toggleDebug() { document.getElementById('debug-panel').classList.toggle('visible'); }
 
-  // =========================================================
-  //  CREDENTIALS
-  // =========================================================
+  // ── Credenciais ───────────────────────────────────────────
   function saveCredentials() {
     const k = document.getElementById('cfg-key').value.trim();
     const s = document.getElementById('cfg-secret').value.trim();
@@ -183,31 +175,21 @@
     localStorage.setItem('pi_key', k);
     localStorage.setItem('pi_secret', s);
     document.getElementById('cfg-status').textContent = '✓ Credenciais salvas';
-    showToast('✓ Credenciais salvas com sucesso!');
+    showToast('✓ Credenciais salvas!');
   }
 
-  // =========================================================
-  //  AUTH  ← CORREÇÃO PRINCIPAL
-  //  O header correto é X-Auth-Hash, não "Authorization"
-  // =========================================================
+  // ── Auth ──────────────────────────────────────────────────
   async function sha1(str) {
     const buf  = new TextEncoder().encode(str);
     const hash = await crypto.subtle.digest('SHA-1', buf);
     return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
-
   async function getAuthHeaders() {
     if (!API_KEY || !API_SECRET) throw new Error('NO_CREDENTIALS');
     const epoch = Math.floor(Date.now() / 1000).toString();
     const hash  = await sha1(API_KEY + API_SECRET + epoch);
-    return {
-      'X-Auth-Key':  API_KEY,
-      'X-Auth-Date': epoch,
-      'Authorization': hash,        // ← CORRETO (o bug era "Authorization" neste campo)
-      'User-Agent':  'PodcastRadar/1.0'
-    };
+    return { 'X-Auth-Key': API_KEY, 'X-Auth-Date': epoch, 'Authorization': hash, 'User-Agent': 'PodcastRadar/1.0' };
   }
-
   async function piGet(endpoint) {
     dbg('GET ' + endpoint);
     const headers = await getAuthHeaders();
@@ -217,17 +199,11 @@
     return res.json();
   }
 
-  // =========================================================
-  //  SEARCH PODCASTS
-  // =========================================================
+  // ── Busca de podcasts ─────────────────────────────────────
   async function searchPodcasts() {
     const q = document.getElementById('podcast-search').value.trim();
     if (!q) return;
-    if (!API_KEY || !API_SECRET) {
-      showToast('⚠️ Configure suas credenciais primeiro!');
-      document.getElementById('cfg-key').focus();
-      return;
-    }
+    if (!API_KEY || !API_SECRET) { showToast('⚠️ Configure suas credenciais primeiro!'); return; }
 
     const btn = document.getElementById('search-btn');
     btn.disabled = true; btn.textContent = '⏳';
@@ -237,48 +213,33 @@
     try {
       const data  = await piGet('/search/byterm?q=' + encodeURIComponent(q) + '&max=18');
       const feeds = data.feeds || [];
-
       document.getElementById('search-status').textContent =
         feeds.length ? feeds.length + ' podcast(s) encontrado(s)' : 'Nenhum resultado encontrado.';
-
-      if (!feeds.length) {
-        document.getElementById('podcast-results').innerHTML =
-          '<div style="grid-column:1/-1;"><div class="state-box"><div class="state-icon">🎙️</div><div class="state-title">Nenhum podcast encontrado</div><div class="state-msg">Tente outro termo de busca.</div></div></div>';
-        return;
-      }
-      document.getElementById('podcast-results').innerHTML = feeds.map(f => podcastCardHtml(f)).join('');
+      document.getElementById('podcast-results').innerHTML = feeds.length
+        ? feeds.map(f => podcastCardHtml(f)).join('')
+        : '<div style="grid-column:1/-1;"><div class="state-box"><div class="state-icon">🎙️</div><div class="state-title">Nenhum podcast encontrado</div></div></div>';
     } catch (e) {
-      const msg = e.message === 'NO_CREDENTIALS' ? 'Configure suas credenciais primeiro!' : 'Erro: ' + e.message;
-      document.getElementById('search-status').textContent = '⚠️ ' + msg;
+      document.getElementById('search-status').textContent = '⚠️ ' + (e.message === 'NO_CREDENTIALS' ? 'Configure suas credenciais!' : e.message);
       document.getElementById('podcast-results').innerHTML = '';
-      dbg(e.message, 'err');
     } finally {
       btn.disabled = false; btn.textContent = 'Buscar →';
     }
   }
 
   function podcastCardHtml(f) {
-    const thumb  = f.artwork || f.image || 'assets/images/current-01.jpg';
+    const thumb  = esc(f.artwork || f.image || 'assets/images/current-01.jpg');
     const author = esc(f.author || f.ownerName || 'Desconhecido');
     const count  = f.episodeCount ? f.episodeCount + ' episódios' : '';
     const title  = esc(f.title || 'Sem título');
-    const safeThumb  = esc(thumb);
-    const safeTitle  = title.replace(/'/g, "\\'");
-    const safeAuthor = author.replace(/'/g, "\\'");
-    const safeImg    = safeThumb.replace(/'/g, "\\'");
-    return '<div class="podcast-card" onclick="selectPodcast(' + f.id + ', \'' + safeTitle + '\', \'' + safeAuthor + '\', \'' + safeImg + '\')">'
-      + '<img src="' + safeThumb + '" class="podcast-thumb" alt="" onerror="this.src=\'assets/images/current-01.jpg\'">'
-      + '<div class="podcast-info">'
-      + '<div class="podcast-title">' + title + '</div>'
+    return '<div class="podcast-card" onclick="selectPodcast(' + f.id + ', \'' + title.replace(/'/g,"\\'") + '\', \'' + author.replace(/'/g,"\\'") + '\', \'' + thumb.replace(/'/g,"\\'") + '\')">'
+      + '<img src="' + thumb + '" class="podcast-thumb" onerror="this.src=\'assets/images/current-01.jpg\'" alt="">'
+      + '<div class="podcast-info"><div class="podcast-title">' + title + '</div>'
       + '<div class="podcast-author">' + author + '</div>'
       + (count ? '<div class="podcast-ep-count">' + count + '</div>' : '')
       + '</div></div>';
   }
 
-  // =========================================================
-  //  DRAWER — SELECT PODCAST & LOAD EPISODES
-  //  Usa fulltext=true para já trazer description no listing
-  // =========================================================
+  // ── Selecionar podcast + carregar episódios ───────────────
   async function selectPodcast(feedId, name, author, thumb) {
     selectedPodcast = { feedId, name, author, thumb };
     episodeCache    = {};
@@ -290,69 +251,50 @@
     document.getElementById('drawer-author').textContent = author;
     const dThumb = document.getElementById('drawer-thumb');
     dThumb.src = thumb;
-    dThumb.onerror = function() { this.src = 'assets/images/current-01.jpg'; };
+    dThumb.onerror = () => { dThumb.src = 'assets/images/current-01.jpg'; };
     document.getElementById('ep-filter').value = '';
     document.getElementById('drawer-overlay').classList.add('open');
     document.getElementById('episode-drawer').classList.add('open');
     document.body.style.overflow = 'hidden';
 
     document.getElementById('drawer-body').innerHTML =
-      '<div class="state-box" style="padding:40px 20px;">'
-      + '<div class="spin"></div>'
-      + '<p style="margin-top:16px;font-size:13px;">Carregando episódios...</p>'
-      + '</div>';
+      '<div class="state-box"><div class="spin"></div><p style="margin-top:16px;font-size:13px;">Carregando episódios...</p></div>';
 
     try {
-      // fulltext=true faz o listing incluir a description completa de cada episódio
       const data = await piGet('/episodes/byfeedid?id=' + feedId + '&max=40&fulltext=true');
       allEpisodes = (data.items || []).sort((a, b) => b.datePublished - a.datePublished);
       allEpisodes.forEach(ep => { episodeCache[ep.id] = ep; });
-      dbg(allEpisodes.length + ' episódios carregados (fulltext)', 'ok');
       renderEpisodeList(allEpisodes);
     } catch (e) {
-      dbg('Erro ao carregar episódios: ' + e.message, 'err');
       document.getElementById('drawer-body').innerHTML =
-        '<div class="state-box" style="padding:40px 20px;"><div class="state-icon">⚠️</div><div class="state-title">Erro</div><div class="state-msg">' + e.message + '</div></div>';
+        '<div class="state-box"><div class="state-icon">⚠️</div><div class="state-title">Erro</div><div class="state-msg">' + esc(e.message) + '</div></div>';
     }
   }
 
   function renderEpisodeList(episodes) {
-    if (!episodes.length) {
-      document.getElementById('drawer-body').innerHTML =
-        '<div class="state-box" style="padding:30px 20px;"><div class="state-msg">Nenhum episódio encontrado.</div></div>';
-      return;
-    }
-    document.getElementById('drawer-body').innerHTML = episodes.map(ep => episodeItemHtml(ep)).join('');
+    document.getElementById('drawer-body').innerHTML = episodes.length
+      ? episodes.map(ep => episodeItemHtml(ep)).join('')
+      : '<div class="state-box"><div class="state-msg">Nenhum episódio encontrado.</div></div>';
   }
 
   function episodeItemHtml(ep) {
-    const thumb = ep.image || ep.feedImage || (selectedPodcast && selectedPodcast.thumb) || 'assets/images/current-01.jpg';
+    const thumb = esc(ep.image || ep.feedImage || (selectedPodcast && selectedPodcast.thumb) || 'assets/images/current-01.jpg');
     const date  = ep.datePublished ? formatDate(ep.datePublished * 1000) : '';
     const dur   = ep.duration ? formatDuration(ep.duration) : '';
     const title = esc(ep.title || 'Sem título');
-    const safeThumb = esc(thumb).replace(/'/g, "\\'");
-    const safeTitle = title.replace(/'/g, "\\'");
-    return '<div class="episode-item" onclick="loadEpisodeLinks(' + ep.id + ', \'' + safeTitle + '\', \'' + safeThumb + '\', ' + (ep.datePublished || 0) + ')">'
-      + '<img src="' + esc(thumb) + '" class="episode-thumb" alt="" onerror="this.src=\'assets/images/current-01.jpg\'">'
-      + '<div class="episode-meta">'
-      + '<div class="episode-title-text">' + title + '</div>'
+    return '<div class="episode-item" onclick="loadEpisodeLinks(' + ep.id + ', \'' + title.replace(/'/g,"\\'") + '\', \'' + thumb.replace(/'/g,"\\'") + '\', ' + (ep.datePublished||0) + ')">'
+      + '<img src="' + thumb + '" class="episode-thumb" onerror="this.src=\'assets/images/current-01.jpg\'" alt="">'
+      + '<div class="episode-meta"><div class="episode-title-text">' + title + '</div>'
       + (date ? '<div class="episode-date">📅 ' + date + '</div>' : '')
       + (dur  ? '<div class="episode-duration">⏱ ' + dur + '</div>' : '')
-      + '</div>'
-      + '<span class="episode-arrow">›</span>'
-      + '</div>';
+      + '</div><span class="episode-arrow">›</span></div>';
   }
 
   function filterEpisodes(q) {
-    const filtered = q
-      ? allEpisodes.filter(e => (e.title || '').toLowerCase().includes(q.toLowerCase()))
-      : allEpisodes;
-    renderEpisodeList(filtered);
+    renderEpisodeList(q ? allEpisodes.filter(e => (e.title||'').toLowerCase().includes(q.toLowerCase())) : allEpisodes);
   }
 
-  // =========================================================
-  //  CLOSE DRAWER
-  // =========================================================
+  // ── Fechar drawer ─────────────────────────────────────────
   document.getElementById('drawer-close-btn').onclick = closeDrawer;
   document.getElementById('drawer-overlay').onclick   = closeDrawer;
   function closeDrawer() {
@@ -360,297 +302,209 @@
     document.getElementById('drawer-overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
-  // =========================================================
-  //  LOAD EPISODE LINKS
-  // =========================================================
+  // ── Carregar links de um episódio ─────────────────────────
   async function loadEpisodeLinks(epId, epTitle, epThumb, datePublished) {
     closeDrawer();
     document.getElementById('news-feed-section').style.display = 'block';
-
     if (loadedEpisodes[epId]) { scrollToEpisode(epId); return; }
 
     const containerId     = 'ep-section-' + epId;
     const episodesContent = document.getElementById('episodes-content');
 
     if (!document.getElementById(containerId)) {
-      var calDay2 = datePublished ? new Date(datePublished*1000).getDate() : '—';
-      var calMon2 = datePublished ? new Date(datePublished*1000).toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase() : '';
-      var dateStr2 = datePublished ? formatDate(datePublished * 1000) : '—';
+      const calDay = datePublished ? new Date(datePublished*1000).getDate() : '—';
+      const calMon = datePublished ? new Date(datePublished*1000).toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase() : '';
+      const dateStr = datePublished ? formatDate(datePublished*1000) : '—';
       episodesContent.insertAdjacentHTML('afterbegin',
         '<div class="episode-section" id="' + containerId + '">'
         + '<div class="episode-section-header">'
-        +   '<div class="ep-bar"></div>'
-        +   '<div class="ep-cal"><div class="ep-cal-top"><span>' + calMon2 + '</span></div><div class="ep-cal-day">' + calDay2 + '</div></div>'
-        +   '<div class="episode-section-meta">'
-        +     '<div class="episode-section-title">' + dateStr2 + '</div>'
-        +     '<span class="episode-link-count">Extraindo...</span>'
-        +   '</div>'
+        + '<div class="ep-bar"></div>'
+        + '<div class="ep-cal"><div class="ep-cal-top"><span>' + calMon + '</span></div><div class="ep-cal-day">' + calDay + '</div></div>'
+        + '<div class="episode-section-meta"><div class="episode-section-title">' + dateStr + '</div>'
+        + '<span class="episode-link-count">Extraindo...</span></div>'
         + '</div>'
         + '<div style="display:flex;gap:12px;align-items:center;padding:30px 0;color:var(--muted);font-size:14px;">'
-        + '<div class="spin"></div> Extraindo links da descrição do episódio...'
-        + '</div>'
-        + '</div>');
+        + '<div class="spin"></div> Extraindo links da descrição...'
+        + '</div></div>');
     }
 
-    setTimeout(function() { scrollToEpisode(epId); }, 100);
+    setTimeout(() => scrollToEpisode(epId), 100);
 
     try {
-      // ── Estratégia 1: cache do listing (fulltext=true já traz description) ──
       let descRaw = '';
       const cached = episodeCache[epId];
-      if (cached) {
-        descRaw = cached.description || cached.content || cached.contentEncoded || cached.summary || '';
-        dbg('Cache: ' + descRaw.length + ' chars de descrição', descRaw.length > 10 ? 'ok' : 'warn');
-      }
+      if (cached) descRaw = cached.description || cached.content || cached.contentEncoded || cached.summary || '';
 
-      // ── Estratégia 2: busca individual se o cache veio vazio ──
       if (!descRaw || descRaw.length < 10) {
-        dbg('Fallback: chamando /episodes/byid?id=' + epId + '&fulltext=true', 'warn');
         try {
           const data = await piGet('/episodes/byid?id=' + epId + '&fulltext=true');
           const ep   = data.episode || {};
           descRaw = ep.description || ep.content || ep.contentEncoded || ep.summary || ep.link || '';
-          dbg('/byid retornou ' + descRaw.length + ' chars', descRaw.length > 10 ? 'ok' : 'err');
-        } catch (fetchErr) {
-          dbg('/byid falhou: ' + fetchErr.message, 'err');
-        }
+        } catch (fetchErr) { dbg('/byid falhou: ' + fetchErr.message, 'err'); }
       }
 
-      // ── Extração de links ──
       const links = extractLinks(descRaw);
-      dbg('Links extraídos: ' + links.length, links.length ? 'ok' : 'warn');
-
       loadedEpisodes[epId] = links;
       renderEpisodeSection(epId, epTitle, epThumb, datePublished, links);
-      showToast(links.length ? '✓ ' + links.length + ' link(s) extraído(s)' : '⚠️ Nenhum link encontrado na descrição');
-
+      showToast(links.length ? '✓ ' + links.length + ' link(s) extraído(s)' : '⚠️ Nenhum link encontrado');
     } catch (e) {
-      dbg('Erro geral: ' + e.message, 'err');
-      var sec = document.getElementById(containerId);
-      if (sec) sec.innerHTML =
-        '<div class="state-box"><div class="state-icon">⚠️</div>'
-        + '<div class="state-title">Erro ao carregar episódio</div>'
-        + '<div class="state-msg">' + esc(e.message) + '</div></div>';
+      const sec = document.getElementById(containerId);
+      if (sec) sec.innerHTML = '<div class="state-box"><div class="state-icon">⚠️</div><div class="state-title">Erro</div><div class="state-msg">' + esc(e.message) + '</div></div>';
     }
   }
 
-  // =========================================================
-  //  LINK EXTRACTION
-  // =========================================================
+  // ── Extração de links ─────────────────────────────────────
   function extractLinks(rawContent) {
     if (!rawContent) return [];
+    const results = [], seen = new Set();
+    const parser  = new DOMParser();
+    const doc     = parser.parseFromString(rawContent, 'text/html');
 
-    const results = [];
-    const seen    = new Set();
-
-    // ── Passo 1: Parse HTML → <a href> ──
-    var parser = new DOMParser();
-    var doc    = parser.parseFromString(rawContent, 'text/html');
-
-    doc.querySelectorAll('a[href]').forEach(function(a) {
-      var href  = (a.getAttribute('href') || '').trim();
-      var label = (a.textContent || a.title || '').trim();
-      if (!href || seen.has(href)) return;
-      if (!isNewsUrl(href)) { dbg('Skip (blocklist): ' + href, 'warn'); return; }
+    doc.querySelectorAll('a[href]').forEach(a => {
+      const href  = (a.getAttribute('href') || '').trim();
+      const label = (a.textContent || a.title || '').trim();
+      if (!href || seen.has(href) || !isNewsUrl(href)) return;
       seen.add(href);
       results.push({ url: href, title: label || slugToTitle(href), source: extractDomain(href), desc: getSurroundingText(doc, a) });
     });
 
-    dbg('Links via <a>: ' + results.length);
-
-    // ── Passo 2: Varredura de texto plano por URLs brutas ──
-    var urlRegex = /https?:\/\/([\w-]+\.)+[\w]{2,}(\/[\w\-._%~:/?#[\]@!$&'()*+,;=%]*)?/g;
-    var texts    = [(doc.body && doc.body.innerText) || '', rawContent];
-    texts.forEach(function(txt) {
-      var m;
+    const urlRegex = /https?:\/\/([\w-]+\.)+[\w]{2,}(\/[\w\-._%~:/?#[\]@!$&'()*+,;=%]*)?/g;
+    [(doc.body && doc.body.innerText) || '', rawContent].forEach(txt => {
+      let m;
       while ((m = urlRegex.exec(txt)) !== null) {
-        var href = m[0].replace(/[.,;:'")\]>]+$/, '');
-        if (seen.has(href)) return;
-        if (!isNewsUrl(href)) return;
+        const href = m[0].replace(/[.,;:'")\]>]+$/, '');
+        if (seen.has(href) || !isNewsUrl(href)) return;
         seen.add(href);
         results.push({ url: href, title: slugToTitle(href), source: extractDomain(href), desc: '' });
       }
     });
 
-    dbg('Total links após varredura: ' + results.length);
+    dbg('Total links: ' + results.length);
     return results;
   }
 
-  var SKIP_DOMAINS = new Set([
-    'spotify.com','podcasts.apple.com','anchor.fm','buzzsprout.com',
-    'podcastindex.org','listennotes.com','podchaser.com','pod.link',
-    'overcast.fm','pocketcasts.com','castro.fm','player.fm',
-    'podcastaddict.com','pocket-casts.com','breaker.audio',
-    'twitter.com','x.com','instagram.com','facebook.com','fb.com',
-    'youtube.com','youtu.be','tiktok.com','linkedin.com','reddit.com',
-    'patreon.com','paypal.com','ko-fi.com','buy.stripe.com','substack.com',
-    'amzn.to','amazon.com','audible.com','apple.com',
-    'linktr.ee','beacons.ai','bio.link',
-    'mailchimp.com','convertkit.com',
+  const SKIP_DOMAINS = new Set([
+    'spotify.com','podcasts.apple.com','anchor.fm','buzzsprout.com','podcastindex.org',
+    'listennotes.com','podchaser.com','pod.link','overcast.fm','pocketcasts.com',
+    'castro.fm','player.fm','podcastaddict.com','breaker.audio',
+    'twitter.com','x.com','instagram.com','facebook.com','youtube.com','youtu.be',
+    'tiktok.com','linkedin.com','reddit.com','patreon.com','paypal.com','ko-fi.com',
+    'substack.com','amzn.to','amazon.com','audible.com','apple.com',
+    'linktr.ee','beacons.ai','bio.link','mailchimp.com','convertkit.com',
   ]);
 
   function isNewsUrl(url) {
     try {
-      var u = new URL(url);
+      const u = new URL(url);
       if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
-      var domain = u.hostname.replace(/^www\./, '');
+      const domain = u.hostname.replace(/^www\./, '');
       if (SKIP_DOMAINS.has(domain)) return false;
       if (u.pathname.replace(/\//g, '').length < 3) return false;
       return true;
-    } catch(e) { return false; }
+    } catch (e) { return false; }
   }
-
-  function extractDomain(url) {
-    try { return new URL(url).hostname.replace(/^www\./, ''); }
-    catch(e) { return url; }
-  }
-
+  function extractDomain(url) { try { return new URL(url).hostname.replace(/^www\./, ''); } catch(e) { return url; } }
   function slugToTitle(url) {
     try {
-      var parts = new URL(url).pathname.split('/').filter(Boolean);
-      var slug  = parts[parts.length - 1] || parts[parts.length - 2] || '';
-      return slug.replace(/[-_]/g,' ').replace(/\.[a-z0-9]+$/,'').replace(/\b\w/g, function(c){ return c.toUpperCase(); }).trim() || extractDomain(url);
+      const parts = new URL(url).pathname.split('/').filter(Boolean);
+      const slug  = parts[parts.length-1] || parts[parts.length-2] || '';
+      return slug.replace(/[-_]/g,' ').replace(/\.[a-z0-9]+$/,'').replace(/\b\w/g,c=>c.toUpperCase()).trim() || extractDomain(url);
     } catch(e) { return url; }
   }
-
   function getSurroundingText(doc, anchor) {
-    var parent = anchor.closest('p, li, blockquote, div, td');
+    const parent = anchor.closest('p, li, blockquote, div, td');
     if (!parent) return '';
-    var txt = (parent.textContent || '').trim();
-    var at  = (anchor.textContent || '').trim();
+    const txt = (parent.textContent||'').trim();
+    const at  = (anchor.textContent||'').trim();
     if (txt.length <= at.length + 5) return '';
-    return txt.substring(0, 180).trim() + (txt.length > 180 ? '…' : '');
+    return txt.substring(0,180).trim() + (txt.length > 180 ? '…' : '');
   }
 
-  // =========================================================
-  //  RENDER EPISODE SECTION
-  // =========================================================
+  // ── Renderizar seção de episódio ──────────────────────────
   function renderEpisodeSection(epId, epTitle, epThumb, datePublished, links) {
-    var section = document.getElementById('ep-section-' + epId);
+    const section    = document.getElementById('ep-section-' + epId);
     if (!section) return;
+    const carouselId = 'carousel-' + epId;
+    const cardsHtml  = links.length
+      ? links.map(l => newsCardHtml(l)).join('')
+      : '<div class="carousel-slide"><div class="state-box"><div class="state-icon">🔍</div><div class="state-title">Sem links</div><div class="state-msg">Nenhum link externo encontrado neste episódio.</div></div></div>';
 
-    var carouselId = 'carousel-' + epId;
-    var cardsHtml  = links.length
-      ? links.map(function(l) { return newsCardHtml(l); }).join('')
-      : '<div class="carousel-slide"><div class="state-box" style="padding:30px 20px;text-align:left;">'
-        + '<div class="state-icon">🔍</div>'
-        + '<div class="state-title">Sem links encontrados</div>'
-        + '<div class="state-msg">Este episódio não tem links externos na descrição. Ative o painel Debug para detalhes.</div>'
-        + '</div></div>';
-
-    // Extrai dia e mês abreviado para o ícone de calendário
-    var calDay = '—', calMon = '';
+    let calDay = '—', calMon = '';
     if (datePublished) {
-      var d = new Date(datePublished * 1000);
+      const d = new Date(datePublished * 1000);
       calDay = d.getDate();
-      calMon = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','').toUpperCase();
+      calMon = d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase();
     }
-    var dateStr   = datePublished ? formatDate(datePublished * 1000) : '—';
-    var countText = links.length ? '(' + links.length + ' links)' : '';
 
     section.innerHTML =
-      // ── Header idêntico ao screenshot ──
       '<div class="episode-section-header">'
-      // barra roxa
       + '<div class="ep-bar"></div>'
-      // ícone calendário
-      + '<div class="ep-cal">'
-      +   '<div class="ep-cal-top"><span>' + calMon + '</span></div>'
-      +   '<div class="ep-cal-day">' + calDay + '</div>'
-      + '</div>'
-      // data + count
+      + '<div class="ep-cal"><div class="ep-cal-top"><span>' + calMon + '</span></div><div class="ep-cal-day">' + calDay + '</div></div>'
       + '<div class="episode-section-meta">'
-      +   '<div class="episode-section-title">' + dateStr + '</div>'
-      +   (links.length ? '<span class="episode-link-count">' + countText + '</span>' : '')
+      + '<div class="episode-section-title">' + (datePublished ? formatDate(datePublished*1000) : '—') + '</div>'
+      + (links.length ? '<span class="episode-link-count">(' + links.length + ' links)</span>' : '')
       + '</div>'
-      // setas à direita
       + '<div class="carousel-header-nav">'
-      +   '<button class="carousel-header-btn prev-btn" onclick="scrollCarousel(\'' + carouselId + '\',-1)" title="Anterior">&#8249;</button>'
-      +   '<button class="carousel-header-btn next-btn" onclick="scrollCarousel(\'' + carouselId + '\',1)" title="Próximo">&#8250;</button>'
-      + '</div>'
-      + '</div>'
-      // ── Carrossel ──
-      + '<div class="news-carousel-wrap">'
-      + '<div class="news-carousel-inner" id="' + carouselId + '">' + cardsHtml + '</div>'
-      + '</div>';
+      + '<button class="carousel-header-btn" onclick="scrollCarousel(\'' + carouselId + '\',-1)">&#8249;</button>'
+      + '<button class="carousel-header-btn" onclick="scrollCarousel(\'' + carouselId + '\',1)">&#8250;</button>'
+      + '</div></div>'
+      + '<div class="news-carousel-wrap"><div class="news-carousel-inner" id="' + carouselId + '">' + cardsHtml + '</div></div>';
   }
 
   function newsCardHtml(link) {
-    var title  = esc(link.title  || link.source);
-    var desc   = esc(link.desc   || '');
-    var source = '@' + esc((link.source || '').toUpperCase());
-    var url    = esc(link.url);
-    var letter = (link.source || '?').charAt(0).toUpperCase();
-    // Tag baseada no domínio
-    var tag = guessTag(link.source, link.title);
-
+    const title  = esc(link.title  || link.source);
+    const source = '@' + esc((link.source||'').toUpperCase());
+    const url    = esc(link.url);
+    const letter = (link.source || '?').charAt(0).toUpperCase();
+    const tag    = guessTag(link.source, link.title);
     return '<div class="carousel-slide">'
       + '<div class="news-card" onclick="window.open(\'' + url + '\',\'_blank\')">'
-      // área da imagem (placeholder com quadradinho branco via CSS ::after)
       + '<div class="news-card-img-wrap no-img"><span>' + letter + '</span></div>'
       + '<div class="news-card-body">'
-      +   '<div class="news-card-title">' + title + '</div>'
-      +   '<span class="news-card-source">' + source + '</span>'
-      +   (desc ? '<p class="news-card-desc">' + desc + '</p>' : '')
-      +   '<span class="news-card-tag">' + tag + '</span>'
-      + '</div>'
-      + '</div></div>';
+      + '<div class="news-card-title">' + title + '</div>'
+      + '<span class="news-card-source">' + source + '</span>'
+      + (link.desc ? '<p class="news-card-desc">' + esc(link.desc) + '</p>' : '')
+      + '<span class="news-card-tag">' + tag + '</span>'
+      + '</div></div></div>';
   }
 
-  // Adivinha a tag da notícia a partir do domínio/título
   function guessTag(source, title) {
-    var text = ((source || '') + ' ' + (title || '')).toLowerCase();
-    if (/nvidia|gpu|chip|amd|intel|hardware/.test(text)) return 'HARDWARE';
-    if (/hack|cyber|security|segurança|vuln/.test(text)) return 'CYBER';
-    if (/gpt|openai|gemini|llm|claude|ia|ai|anthropic|deepmind/.test(text)) return 'AI';
-    if (/oil|gas|petro|energy|energia/.test(text)) return 'ENERGY';
-    if (/finance|invest|market|stock|crypto/.test(text)) return 'FINANCE';
+    const text = ((source||'') + ' ' + (title||'')).toLowerCase();
+    if (/nvidia|gpu|chip|amd|intel/.test(text))    return 'HARDWARE';
+    if (/hack|cyber|security|segurança/.test(text)) return 'CYBER';
+    if (/gpt|openai|gemini|llm|claude|ia|ai/.test(text)) return 'AI';
+    if (/oil|gas|petro|energy/.test(text))          return 'ENERGY';
+    if (/finance|invest|market|stock/.test(text))   return 'FINANCE';
     return 'TECH';
   }
 
-  // =========================================================
-  //  CAROUSEL NAV
-  // =========================================================
   function scrollCarousel(id, dir) {
-    var el = document.getElementById(id);
+    const el = document.getElementById(id);
     if (el) el.scrollBy({ left: dir * 320, behavior: 'smooth' });
   }
 
-  // =========================================================
-  //  HELPERS
-  // =========================================================
+  // ── Helpers ───────────────────────────────────────────────
   function scrollToEpisode(epId) {
-    var el = document.getElementById('ep-section-' + epId);
+    const el = document.getElementById('ep-section-' + epId);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-  function formatDate(ts) {
-    return new Date(ts).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-  }
+  function formatDate(ts) { return new Date(ts).toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}); }
   function formatDuration(secs) {
     if (!secs) return '';
-    var h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60);
+    const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60);
     return h ? h + 'h ' + m + 'min' : m + 'min';
   }
   function esc(str) {
-    return String(str || '')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function showToast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 3500);
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function loadingSkeletonGrid(n) {
-    var card = '<div style="background:var(--surface);border-radius:16px;padding:18px;display:flex;gap:14px;">'
+    const card = '<div style="background:var(--bg-card);border-radius:16px;padding:18px;display:flex;gap:14px;">'
       + '<div class="skeleton sk-block"></div>'
-      + '<div style="flex:1"><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div>'
-      + '<div class="skeleton sk-line" style="width:40%;margin-top:12px;"></div></div></div>';
-    var out = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-top:30px;grid-column:1/-1;">';
-    for (var i = 0; i < n; i++) out += card;
+      + '<div style="flex:1"><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div></div></div>';
+    let out = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-top:30px;grid-column:1/-1;">';
+    for (let i = 0; i < n; i++) out += card;
     return out + '</div>';
   }
   </script>

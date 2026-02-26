@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Podcast Radar</title>
+
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-liberty-market.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+  <link rel="stylesheet" href="assets/css/animate.css">
+
+  <style>
+    /* ── Design tokens – espelha o padrão do site ── */
+    :root {
+      --bg:        #0e0f11;
+      --surface:   #16181c;
+      --surface-2: #1c1e24;
+      --border:    #252830;
+      --purple:    #7453f8;
+      --purple-dim:rgba(116,83,248,.12);
+      --cyan:      #00ffcc;
+      --cyan-dim:  rgba(0,255,204,.10);
+      --text:      #e8e9ec;
+      --muted:     #555b6e;
+      --danger:    #ff4d6d;
+      --font-head: 'Syne', sans-serif;
+      --font-body: 'Roboto', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── Page Heading – herda estilo do site ── */
+    .page-heading.normal-space { padding: 60px 0 40px; }
+    .page-heading h2 { font-family: var(--font-head); font-weight: 800; color: #fff; }
+    .page-heading p  { color: var(--cyan); font-weight: 700; }
+
+    /* ── Section heading – igual ao site ── */
+    .section-heading { margin-bottom: 30px; }
+    .section-heading .line-dec {
+      width: 52px; height: 3px;
+      background: linear-gradient(to right, var(--purple), var(--cyan));
+      border-radius: 2px; margin-bottom: 14px;
+    }
+    .section-heading h3 {
+      font-family: var(--font-head); font-size: 20px;
+      font-weight: 700; color: #fff;
+    }
+    .section-heading h2 {
+      font-family: var(--font-head); font-size: 30px;
+      font-weight: 800; color: #fff;
+    }
+    .section-heading h2 em { color: var(--purple); font-style: normal; }
+
+    /* ── Botões principais – estilo do site ── */
+    .main-button a, .main-button button {
+      display: inline-block;
+      background-color: var(--purple);
+      color: #fff !important;
+      border: 2px solid var(--purple);
+      border-radius: 40px;
+      padding: 12px 28px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, border-color .2s, transform .15s, box-shadow .2s;
+    }
+    .main-button a:hover, .main-button button:hover {
+      background-color: #5f3de0;
+      border-color: #5f3de0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(116,83,248,.35);
+    }
+
+    /* botão contorno ciano */
+    .border-button a, .border-button button {
+      display: inline-block;
+      background: transparent;
+      border: 2px solid var(--cyan);
+      color: var(--cyan) !important;
+      border-radius: 40px;
+      padding: 12px 28px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+    }
+    .border-button a:hover, .border-button button:hover {
+      background: var(--cyan-dim);
+      transform: translateY(-2px);
+    }
+
+    /* ── API Config banner ── */
+    .api-config-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--cyan);
+      border-radius: 8px;
+      padding: 18px 24px;
+      margin-bottom: 36px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .api-config-banner p { margin: 0; font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
+    .api-config-banner p span { color: var(--cyan); font-weight: 600; }
+    .config-inputs { display: flex; gap: 10px; flex-wrap: wrap; }
+    .config-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 9px 14px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      width: 210px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .config-input:focus { border-color: var(--cyan); }
+    .config-input::placeholder { color: var(--muted); }
+    .config-save-btn {
+      background: var(--cyan-dim);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      border-radius: 6px;
+      padding: 9px 20px;
+      font-family: var(--font-head);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .config-save-btn:hover { background: var(--cyan); color: #0e0f11; }
+
+    /* ── Search ── */
+    .search-area { padding: 50px 0 30px; }
+    .search-wrap { display: flex; gap: 12px; max-width: 700px; }
+    .search-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 14px 24px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--purple); box-shadow: 0 0 0 4px var(--purple-dim); }
+    .search-btn {
+      background: var(--purple);
+      color: #fff;
+      border: 2px solid var(--purple);
+      border-radius: 40px;
+      padding: 14px 30px;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .search-btn:hover { background: #5f3de0; border-color: #5f3de0; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(116,83,248,.35); }
+    .search-btn:active { transform: translateY(0); }
+    .search-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    /* ── Podcast grid ── */
+    #podcast-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 28px;
+    }
+    .podcast-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex; gap: 14px; align-items: flex-start;
+      cursor: pointer;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
+    }
+    .podcast-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--purple-dim);
+      opacity: 0; transition: opacity .2s;
+    }
+    .podcast-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(116,83,248,.18);
+    }
+    .podcast-card:hover::after { opacity: 1; }
+    .podcast-card.active { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-dim); }
+    .podcast-thumb {
+      width: 64px; height: 64px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface-2);
+    }
+    .podcast-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+    .podcast-title {
+      font-family: var(--font-head);
+      font-size: 14px; font-weight: 700; color: #fff; line-height: 1.35;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .podcast-author { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .podcast-ep-count {
+      font-size: 11px; color: var(--cyan); font-weight: 600;
+      margin-top: 6px; font-family: var(--font-mono);
+    }
+
+    /* ── Drawer ── */
+    #drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(6px);
+      z-index: 900; opacity: 0; pointer-events: none; transition: opacity .35s;
+    }
+    #drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    #episode-drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 460px; max-width: 95vw;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      z-index: 901; display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .4s cubic-bezier(.16, 1, .3, 1);
+      box-shadow: -24px 0 60px rgba(0,0,0,.6);
+    }
+    #episode-drawer.open { transform: translateX(0); }
+    .drawer-header {
+      padding: 24px 24px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .drawer-podcast-thumb { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+    .drawer-podcast-meta { flex: 1; min-width: 0; }
+    .drawer-podcast-name {
+      font-family: var(--font-head); font-size: 15px;
+      font-weight: 700; color: #fff; line-height: 1.3;
+    }
+    .drawer-podcast-author { font-size: 12px; color: var(--muted); margin-top: 3px; font-family: var(--font-mono); }
+    .drawer-close {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; flex-shrink: 0; margin-left: auto;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .drawer-close:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+    .drawer-search-bar { padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .drawer-search {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .drawer-search:focus { border-color: var(--purple); }
+    .drawer-search::placeholder { color: var(--muted); }
+    .drawer-body { flex: 1; overflow-y: auto; }
+    .drawer-body::-webkit-scrollbar { width: 4px; }
+    .drawer-body::-webkit-scrollbar-track { background: transparent; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .episode-item {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .15s;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .episode-item:hover { background: var(--surface-2); }
+    .episode-item:last-child { border-bottom: none; }
+    .episode-thumb { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--bg); }
+    .episode-meta { flex: 1; min-width: 0; }
+    .episode-title-text {
+      font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      font-family: var(--font-body);
+    }
+    .episode-date  { font-size: 11px; color: var(--muted); margin-top: 4px; font-family: var(--font-mono); }
+    .episode-duration { font-size: 11px; color: var(--cyan); font-weight: 600; margin-top: 2px; font-family: var(--font-mono); }
+    .episode-arrow { color: var(--muted); font-size: 16px; flex-shrink: 0; margin-top: 2px; transition: transform .2s, color .2s; }
+    .episode-item:hover .episode-arrow { transform: translateX(4px); color: var(--cyan); }
+
+    /* ── Section header – idêntico ao screenshot ── */
+    .episode-section { margin-bottom: 60px; }
+    .episode-section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 22px;
+    }
+    /* barra roxa vertical */
+    .ep-bar {
+      width: 4px; height: 28px; border-radius: 2px;
+      background: var(--purple); flex-shrink: 0;
+    }
+    /* ícone calendário iOS */
+    .ep-cal {
+      width: 36px; height: 36px; border-radius: 7px;
+      background: #fff; flex-shrink: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+      box-shadow: 0 2px 6px rgba(0,0,0,.45);
+    }
+    .ep-cal-top {
+      background: #d93025; height: 11px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ep-cal-top span {
+      font-size: 6.5px; font-weight: 800; color: #fff;
+      letter-spacing: .2px; font-family: var(--font-head);
+      text-transform: uppercase;
+    }
+    .ep-cal-day {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head); font-size: 14px;
+      font-weight: 800; color: #1a1a1a; line-height: 1;
+    }
+    /* data + meta ao centro */
+    .episode-section-meta { flex: 1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .episode-section-title {
+      font-family: var(--font-head); font-size: 18px;
+      font-weight: 700; color: #fff; line-height: 1;
+    }
+    .episode-section-date { display: none; } /* incorporado ao título */
+    .episode-link-count {
+      color: #8870d8; font-size: 14px;
+      font-weight: 600; font-family: var(--font-head);
+      white-space: nowrap; background: none; border: none; padding: 0;
+    }
+    /* esconde thumb do episódio – não presente no screenshot */
+    .episode-section-thumb { display: none; }
+
+    /* ── News Cards – fiel ao screenshot ── */
+    .news-card {
+      background: #22252f;
+      border: none;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      cursor: pointer; height: 100%;
+      display: flex; flex-direction: column;
+      box-shadow: 0 2px 10px rgba(0,0,0,.35);
+    }
+    .news-card:hover { transform: translateY(-5px); box-shadow: 0 14px 32px rgba(0,0,0,.5); }
+
+    /* área da imagem com checkbox branco no canto */
+    .news-card-img-wrap {
+      width: 100%; height: 195px;
+      position: relative; flex-shrink: 0; overflow: hidden;
+      background: #16181f;
+    }
+    .news-card-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    /* placeholder sem imagem */
+    .news-card-img-wrap.no-img {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .news-card-img-wrap.no-img span {
+      font-family: var(--font-head); font-size: 42px; opacity: .12; color: #fff;
+    }
+    /* quadradinho branco no canto sup. direito (checkbox da imagem) */
+    .news-card-img-wrap::after {
+      content: '';
+      position: absolute; top: 12px; right: 12px;
+      width: 20px; height: 20px;
+      background: #fff; border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(0,0,0,.5);
+      z-index: 2;
+    }
+
+    .news-card-body {
+      padding: 18px 18px 16px;
+      flex: 1; display: flex; flex-direction: column;
+    }
+    /* título monospace bold – exatamente como no screenshot */
+    .news-card-title {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px; font-weight: 700; color: #e8eaf0;
+      line-height: 1.55; margin-bottom: 7px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    /* @SOURCE em maiúsculas roxo/cinza */
+    .news-card-source {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .6px; text-transform: uppercase;
+      color: #9b8fcc; margin-bottom: 10px;
+      display: block;
+    }
+    /* remove o ::before que existia antes */
+    .news-card-source::before { display: none; }
+    /* descrição monospace cinza */
+    .news-card-desc {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px; color: #7a8094; line-height: 1.65;
+      flex: 1;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: 14px;
+    }
+    /* tag pílula roxa no rodapé – "AI", "TECH" etc. */
+    .news-card-tag {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #6c4fd6; color: #fff;
+      border-radius: 40px; padding: 3px 14px;
+      font-size: 11px; font-weight: 700;
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: .3px; align-self: flex-start;
+    }
+    /* oculta link "Ler artigo" – não aparece no screenshot */
+    .news-card-link { display: none; }
+
+    /* ── Carousel – navegação via botões no header da seção ── */
+    .news-carousel-wrap { position: relative; }
+    .news-carousel-inner {
+      display: flex; gap: 18px;
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+      scrollbar-width: none;
+    }
+    .news-carousel-inner::-webkit-scrollbar { display: none; }
+    .news-carousel-inner .carousel-slide {
+      min-width: 310px; max-width: 310px;
+      scroll-snap-align: start; flex-shrink: 0;
+    }
+    /* setas laterais antigas – removidas; agora ficam no header */
+    .carousel-nav-btn { display: none; }
+
+    /* ── Setas no header da seção (lado direito) ── */
+    .carousel-header-nav { display: flex; gap: 6px; margin-left: auto; flex-shrink: 0; }
+    .carousel-header-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #2e3140; border: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #6e7690; font-size: 17px; line-height: 1;
+      transition: background .2s, color .2s;
+    }
+    .carousel-header-btn:hover { background: #3e4460; color: #c8cfe0; }
+    /* seta direita tem fundo ligeiramente mais claro (como no screenshot) */
+    .carousel-header-btn.next-btn { background: #363a4e; color: #c8cfe0; }
+
+    /* ── States / Empty ── */
+    .state-box { padding: 60px 30px; text-align: center; color: var(--muted); }
+    .state-box .state-icon { font-size: 44px; margin-bottom: 14px; display: block; }
+    .state-box .state-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .state-box .state-msg { font-size: 13px; color: var(--muted); }
+
+    /* ── Debug panel ── */
+    .debug-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px; color: var(--muted);
+      max-height: 200px; overflow-y: auto; display: none;
+    }
+    .debug-panel.visible { display: block; }
+    .debug-line      { padding: 2px 0; }
+    .debug-line.ok   { color: var(--cyan); }
+    .debug-line.err  { color: var(--danger); }
+    .debug-line.warn { color: #f5a623; }
+    .debug-toggle {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .debug-toggle:hover { color: var(--cyan); border-color: var(--cyan); }
+
+    /* ── Spinner ── */
+    .spin {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid var(--border); border-top-color: var(--purple);
+      border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Skeleton loader ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    .sk-line  { height: 12px; margin-bottom: 8px; }
+    .sk-line.short { width: 55%; }
+    .sk-block { height: 52px; width: 52px; border-radius: 8px; flex-shrink: 0; }
+
+    /* ── Toast – igual ao padrão do site ── */
+    #toast {
+      position: fixed;
+      bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface-2);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-family: var(--font-head);
+      font-size: 13px; font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 40px;
+      opacity: 0; pointer-events: none;
+      transition: all .3s;
+      z-index: 9999; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 0 0 48px; }
+
+    .badge-cyan {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      border: 1px solid rgba(0,255,204,.25);
+      border-radius: 40px;
+      padding: 3px 12px;
+      font-size: 11px; font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: .3px;
+    }
+
+    /* scrollbar global */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    @media (max-width: 768px) {
+      #episode-drawer { width: 100%; }
+      .news-carousel-inner .carousel-slide { min-width: 265px; max-width: 265px; }
+      .api-config-banner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header class="header-area header-sticky">
+    <div class="container">
+      <div class="row"><div class="col-12">
+        <nav class="main-nav">
+          <a href="index.html" class="logo">⬡ Radar</a>
+          <ul class="nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="create.html">Transcritor de Podcast</a></li>
+            <li><a href="details.html">News Radar</a></li>
+            <li><a href="podcast-radar.html" class="active">Podcast Radar</a></li>
+            <li><a href="table.html">Newsboard</a></li>
+          </ul>
+          <a class="menu-trigger"><span>Menu</span></a>
+        </nav>
+      </div></div>
+    </div>
+  </header>
+
+  <!-- PAGE HEADING -->
+  <div class="page-heading normal-space">
+    <div class="container"><div class="row"><div class="col-lg-12">
+      <h2>Podcast Radar</h2>
+      <p>Extraia e explore os links de notícias diretamente das descrições dos episódios</p>
+    </div></div></div>
+  </div>
+
+  <!-- DRAWER OVERLAY -->
+  <div id="drawer-overlay"></div>
+
+  <!-- EPISODE DRAWER -->
+  <div id="episode-drawer">
+    <div class="drawer-header">
+      <img id="drawer-thumb" src="" class="drawer-podcast-thumb" alt="">
+      <div class="drawer-podcast-meta">
+        <div id="drawer-name" class="drawer-podcast-name">—</div>
+        <div id="drawer-author" class="drawer-podcast-author">—</div>
+      </div>
+      <button class="drawer-close" id="drawer-close-btn" title="Fechar">✕</button>
+    </div>
+    <div class="drawer-search-bar">
+      <input type="text" class="drawer-search" id="ep-filter" placeholder="Filtrar episódios..." oninput="filterEpisodes(this.value)">
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <div class="state-box" style="padding:40px 20px;">
+        <div class="spin"></div>
+        <p style="margin-top:16px; font-size:13px;">Buscando episódios...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="item-details-page">
+    <div class="container">
+
+      <!-- API CONFIG -->
+      <div class="row" style="padding-top: 50px;">
+        <div class="col-lg-12">
+          <div class="api-config-banner">
+            <div>
+              <p><span>🔑 Credenciais Podcast Index</span></p>
+              <p style="font-size:12px; margin-top:4px;">Insira sua API Key e Secret do
+                <a href="https://podcastindex.org" target="_blank" style="color:var(--amber);">podcastindex.org</a> (gratuito)
+              </p>
+            </div>
+            <div class="config-inputs">
+              <input type="text"     class="config-input" id="cfg-key"    placeholder="API Key"    autocomplete="off">
+              <input type="password" class="config-input" id="cfg-secret" placeholder="API Secret" autocomplete="off">
+              <button class="config-save-btn" onclick="saveCredentials()">Salvar</button>
+            </div>
+            <span id="cfg-status" style="font-size:12px; color:var(--muted);"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="row">
+        <div class="col-lg-12 search-area" style="padding-top:0;">
+          <div class="section-heading">
+            <div class="line-dec"></div>
+            <h3>Encontre um Podcast</h3>
+          </div>
+          <div class="search-wrap">
+            <input type="text" class="search-input" id="podcast-search"
+              placeholder="Ex: Lex Fridman, Huberman Lab, Tecnologia..."
+              onkeydown="if(event.key==='Enter') searchPodcasts()">
+            <button class="search-btn" id="search-btn" onclick="searchPodcasts()">Buscar →</button>
+          </div>
+          <div id="search-status" style="font-size:13px; color:var(--muted); margin-top:14px; min-height:20px;"></div>
+          <div id="podcast-results"></div>
+        </div>
+      </div>
+
+      <!-- NEWS FEED -->
+      <div class="row" id="news-feed-section" style="padding-top:20px; display:none;">
+        <div class="col-lg-12">
+          <hr class="divider">
+          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+            <div class="section-heading" style="margin-bottom:0;">
+              <div class="line-dec"></div>
+              <h3>Links dos Episódios</h3>
+            </div>
+            <button class="debug-toggle" onclick="toggleDebug()">🛠 Debug</button>
+          </div>
+          <p style="color:var(--muted); font-size:14px; margin-bottom:16px;">
+            Clique em um episódio na gaveta para extrair os links da descrição.
+          </p>
+          <div class="debug-panel" id="debug-panel"></div>
+          <div style="margin-bottom:30px;"></div>
+          <div id="episodes-content"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- VENDOR JS -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/js/owl-carousel.js"></script>
+  <script src="assets/js/custom.js"></script>
+
+  <script>
+  // =========================================================
+  //  STATE
+  // =========================================================
+  let API_KEY     = localStorage.getItem('pi_key')    || '';
+  let API_SECRET  = localStorage.getItem('pi_secret') || '';
+  let allEpisodes    = [];
+  let selectedPodcast = null;
+  let loadedEpisodes  = {};   // epId  -> links[]
+  let episodeCache    = {};   // epId  -> full episode object
+
+  if (API_KEY)    document.getElementById('cfg-key').value    = '••••••';
+  if (API_SECRET) document.getElementById('cfg-secret').value = '••••••';
+  if (API_KEY && API_SECRET) document.getElementById('cfg-status').textContent = '✓ Credenciais salvas';
+
+  // =========================================================
+  //  DEBUG
+  // =========================================================
+  function dbg(msg, type) {
+    const panel = document.getElementById('debug-panel');
+    const d = document.createElement('div');
+    d.className = 'debug-line' + (type ? ' ' + type : '');
+    d.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+    panel.appendChild(d);
+    panel.scrollTop = panel.scrollHeight;
+    console.log('[PodcastRadar]', msg);
+  }
+  function toggleDebug() {
+    document.getElementById('debug-panel').classList.toggle('visible');
+  }
+
+  // =========================================================
+  //  CREDENTIALS
+  // =========================================================
+  function saveCredentials() {
+    const k = document.getElementById('cfg-key').value.trim();
+    const s = document.getElementById('cfg-secret').value.trim();
+    if (!k || !s || k === '••••••') { showToast('Insira suas credenciais válidas.'); return; }
+    API_KEY = k; API_SECRET = s;
+    localStorage.setItem('pi_key', k);
+    localStorage.setItem('pi_secret', s);
+    document.getElementById('cfg-status').textContent = '✓ Credenciais salvas';
+    showToast('✓ Credenciais salvas com sucesso!');
+  }
+
+  // =========================================================
+  //  AUTH  ← CORREÇÃO PRINCIPAL
+  //  O header correto é X-Auth-Hash, não "Authorization"
+  // =========================================================
+  async function sha1(str) {
+    const buf  = new TextEncoder().encode(str);
+    const hash = await crypto.subtle.digest('SHA-1', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function getAuthHeaders() {
+    if (!API_KEY || !API_SECRET) throw new Error('NO_CREDENTIALS');
+    const epoch = Math.floor(Date.now() / 1000).toString();
+    const hash  = await sha1(API_KEY + API_SECRET + epoch);
+    return {
+      'X-Auth-Key':  API_KEY,
+      'X-Auth-Date': epoch,
+      'Authorization': hash,        // ← CORRETO (o bug era "Authorization" neste campo)
+      'User-Agent':  'PodcastRadar/1.0'
+    };
+  }
+
+  async function piGet(endpoint) {
+    dbg('GET ' + endpoint);
+    const headers = await getAuthHeaders();
+    const res = await fetch('https://api.podcastindex.org/api/1.0' + endpoint, { headers });
+    dbg('HTTP ' + res.status, res.ok ? 'ok' : 'err');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
+  // =========================================================
+  //  SEARCH PODCASTS
+  // =========================================================
+  async function searchPodcasts() {
+    const q = document.getElementById('podcast-search').value.trim();
+    if (!q) return;
+    if (!API_KEY || !API_SECRET) {
+      showToast('⚠️ Configure suas credenciais primeiro!');
+      document.getElementById('cfg-key').focus();
+      return;
+    }
+
+    const btn = document.getElementById('search-btn');
+    btn.disabled = true; btn.textContent = '⏳';
+    document.getElementById('search-status').textContent = 'Buscando podcasts...';
+    document.getElementById('podcast-results').innerHTML = loadingSkeletonGrid(6);
+
+    try {
+      const data  = await piGet('/search/byterm?q=' + encodeURIComponent(q) + '&max=18');
+      const feeds = data.feeds || [];
+
+      document.getElementById('search-status').textContent =
+        feeds.length ? feeds.length + ' podcast(s) encontrado(s)' : 'Nenhum resultado encontrado.';
+
+      if (!feeds.length) {
+        document.getElementById('podcast-results').innerHTML =
+          '<div style="grid-column:1/-1;"><div class="state-box"><div class="state-icon">🎙️</div><div class="state-title">Nenhum podcast encontrado</div><div class="state-msg">Tente outro termo de busca.</div></div></div>';
+        return;
+      }
+      document.getElementById('podcast-results').innerHTML = feeds.map(f => podcastCardHtml(f)).join('');
+    } catch (e) {
+      const msg = e.message === 'NO_CREDENTIALS' ? 'Configure suas credenciais primeiro!' : 'Erro: ' + e.message;
+      document.getElementById('search-status').textContent = '⚠️ ' + msg;
+      document.getElementById('podcast-results').innerHTML = '';
+      dbg(e.message, 'err');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Buscar →';
+    }
+  }
+
+  function podcastCardHtml(f) {
+    const thumb  = f.artwork || f.image || 'assets/images/current-01.jpg';
+    const author = esc(f.author || f.ownerName || 'Desconhecido');
+    const count  = f.episodeCount ? f.episodeCount + ' episódios' : '';
+    const title  = esc(f.title || 'Sem título');
+    const safeThumb  = esc(thumb);
+    const safeTitle  = title.replace(/'/g, "\\'");
+    const safeAuthor = author.replace(/'/g, "\\'");
+    const safeImg    = safeThumb.replace(/'/g, "\\'");
+    return '<div class="podcast-card" onclick="selectPodcast(' + f.id + ', \'' + safeTitle + '\', \'' + safeAuthor + '\', \'' + safeImg + '\')">'
+      + '<img src="' + safeThumb + '" class="podcast-thumb" alt="" onerror="this.src=\'assets/images/current-01.jpg\'">'
+      + '<div class="podcast-info">'
+      + '<div class="podcast-title">' + title + '</div>'
+      + '<div class="podcast-author">' + author + '</div>'
+      + (count ? '<div class="podcast-ep-count">' + count + '</div>' : '')
+      + '</div></div>';
+  }
+
+  // =========================================================
+  //  DRAWER — SELECT PODCAST & LOAD EPISODES
+  //  Usa fulltext=true para já trazer description no listing
+  // =========================================================
+  async function selectPodcast(feedId, name, author, thumb) {
+    selectedPodcast = { feedId, name, author, thumb };
+    episodeCache    = {};
+
+    document.querySelectorAll('.podcast-card').forEach(c => c.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    document.getElementById('drawer-name').textContent   = name;
+    document.getElementById('drawer-author').textContent = author;
+    const dThumb = document.getElementById('drawer-thumb');
+    dThumb.src = thumb;
+    dThumb.onerror = function() { this.src = 'assets/images/current-01.jpg'; };
+    document.getElementById('ep-filter').value = '';
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('episode-drawer').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('drawer-body').innerHTML =
+      '<div class="state-box" style="padding:40px 20px;">'
+      + '<div class="spin"></div>'
+      + '<p style="margin-top:16px;font-size:13px;">Carregando episódios...</p>'
+      + '</div>';
+
+    try {
+      // fulltext=true faz o listing incluir a description completa de cada episódio
+      const data = await piGet('/episodes/byfeedid?id=' + feedId + '&max=40&fulltext=true');
+      allEpisodes = (data.items || []).sort((a, b) => b.datePublished - a.datePublished);
+      allEpisodes.forEach(ep => { episodeCache[ep.id] = ep; });
+      dbg(allEpisodes.length + ' episódios carregados (fulltext)', 'ok');
+      renderEpisodeList(allEpisodes);
+    } catch (e) {
+      dbg('Erro ao carregar episódios: ' + e.message, 'err');
+      document.getElementById('drawer-body').innerHTML =
+        '<div class="state-box" style="padding:40px 20px;"><div class="state-icon">⚠️</div><div class="state-title">Erro</div><div class="state-msg">' + e.message + '</div></div>';
+    }
+  }
+
+  function renderEpisodeList(episodes) {
+    if (!episodes.length) {
+      document.getElementById('drawer-body').innerHTML =
+        '<div class="state-box" style="padding:30px 20px;"><div class="state-msg">Nenhum episódio encontrado.</div></div>';
+      return;
+    }
+    document.getElementById('drawer-body').innerHTML = episodes.map(ep => episodeItemHtml(ep)).join('');
+  }
+
+  function episodeItemHtml(ep) {
+    const thumb = ep.image || ep.feedImage || (selectedPodcast && selectedPodcast.thumb) || 'assets/images/current-01.jpg';
+    const date  = ep.datePublished ? formatDate(ep.datePublished * 1000) : '';
+    const dur   = ep.duration ? formatDuration(ep.duration) : '';
+    const title = esc(ep.title || 'Sem título');
+    const safeThumb = esc(thumb).replace(/'/g, "\\'");
+    const safeTitle = title.replace(/'/g, "\\'");
+    return '<div class="episode-item" onclick="loadEpisodeLinks(' + ep.id + ', \'' + safeTitle + '\', \'' + safeThumb + '\', ' + (ep.datePublished || 0) + ')">'
+      + '<img src="' + esc(thumb) + '" class="episode-thumb" alt="" onerror="this.src=\'assets/images/current-01.jpg\'">'
+      + '<div class="episode-meta">'
+      + '<div class="episode-title-text">' + title + '</div>'
+      + (date ? '<div class="episode-date">📅 ' + date + '</div>' : '')
+      + (dur  ? '<div class="episode-duration">⏱ ' + dur + '</div>' : '')
+      + '</div>'
+      + '<span class="episode-arrow">›</span>'
+      + '</div>';
+  }
+
+  function filterEpisodes(q) {
+    const filtered = q
+      ? allEpisodes.filter(e => (e.title || '').toLowerCase().includes(q.toLowerCase()))
+      : allEpisodes;
+    renderEpisodeList(filtered);
+  }
+
+  // =========================================================
+  //  CLOSE DRAWER
+  // =========================================================
+  document.getElementById('drawer-close-btn').onclick = closeDrawer;
+  document.getElementById('drawer-overlay').onclick   = closeDrawer;
+  function closeDrawer() {
+    document.getElementById('episode-drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeDrawer(); });
+
+  // =========================================================
+  //  LOAD EPISODE LINKS
+  // =========================================================
+  async function loadEpisodeLinks(epId, epTitle, epThumb, datePublished) {
+    closeDrawer();
+    document.getElementById('news-feed-section').style.display = 'block';
+
+    if (loadedEpisodes[epId]) { scrollToEpisode(epId); return; }
+
+    const containerId     = 'ep-section-' + epId;
+    const episodesContent = document.getElementById('episodes-content');
+
+    if (!document.getElementById(containerId)) {
+      var calDay2 = datePublished ? new Date(datePublished*1000).getDate() : '—';
+      var calMon2 = datePublished ? new Date(datePublished*1000).toLocaleDateString('pt-BR',{month:'short'}).replace('.','').toUpperCase() : '';
+      var dateStr2 = datePublished ? formatDate(datePublished * 1000) : '—';
+      episodesContent.insertAdjacentHTML('afterbegin',
+        '<div class="episode-section" id="' + containerId + '">'
+        + '<div class="episode-section-header">'
+        +   '<div class="ep-bar"></div>'
+        +   '<div class="ep-cal"><div class="ep-cal-top"><span>' + calMon2 + '</span></div><div class="ep-cal-day">' + calDay2 + '</div></div>'
+        +   '<div class="episode-section-meta">'
+        +     '<div class="episode-section-title">' + dateStr2 + '</div>'
+        +     '<span class="episode-link-count">Extraindo...</span>'
+        +   '</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:12px;align-items:center;padding:30px 0;color:var(--muted);font-size:14px;">'
+        + '<div class="spin"></div> Extraindo links da descrição do episódio...'
+        + '</div>'
+        + '</div>');
+    }
+
+    setTimeout(function() { scrollToEpisode(epId); }, 100);
+
+    try {
+      // ── Estratégia 1: cache do listing (fulltext=true já traz description) ──
+      let descRaw = '';
+      const cached = episodeCache[epId];
+      if (cached) {
+        descRaw = cached.description || cached.content || cached.contentEncoded || cached.summary || '';
+        dbg('Cache: ' + descRaw.length + ' chars de descrição', descRaw.length > 10 ? 'ok' : 'warn');
+      }
+
+      // ── Estratégia 2: busca individual se o cache veio vazio ──
+      if (!descRaw || descRaw.length < 10) {
+        dbg('Fallback: chamando /episodes/byid?id=' + epId + '&fulltext=true', 'warn');
+        try {
+          const data = await piGet('/episodes/byid?id=' + epId + '&fulltext=true');
+          const ep   = data.episode || {};
+          descRaw = ep.description || ep.content || ep.contentEncoded || ep.summary || ep.link || '';
+          dbg('/byid retornou ' + descRaw.length + ' chars', descRaw.length > 10 ? 'ok' : 'err');
+        } catch (fetchErr) {
+          dbg('/byid falhou: ' + fetchErr.message, 'err');
+        }
+      }
+
+      // ── Extração de links ──
+      const links = extractLinks(descRaw);
+      dbg('Links extraídos: ' + links.length, links.length ? 'ok' : 'warn');
+
+      loadedEpisodes[epId] = links;
+      renderEpisodeSection(epId, epTitle, epThumb, datePublished, links);
+      showToast(links.length ? '✓ ' + links.length + ' link(s) extraído(s)' : '⚠️ Nenhum link encontrado na descrição');
+
+    } catch (e) {
+      dbg('Erro geral: ' + e.message, 'err');
+      var sec = document.getElementById(containerId);
+      if (sec) sec.innerHTML =
+        '<div class="state-box"><div class="state-icon">⚠️</div>'
+        + '<div class="state-title">Erro ao carregar episódio</div>'
+        + '<div class="state-msg">' + esc(e.message) + '</div></div>';
+    }
+  }
+
+  // =========================================================
+  //  LINK EXTRACTION
+  // =========================================================
+  function extractLinks(rawContent) {
+    if (!rawContent) return [];
+
+    const results = [];
+    const seen    = new Set();
+
+    // ── Passo 1: Parse HTML → <a href> ──
+    var parser = new DOMParser();
+    var doc    = parser.parseFromString(rawContent, 'text/html');
+
+    doc.querySelectorAll('a[href]').forEach(function(a) {
+      var href  = (a.getAttribute('href') || '').trim();
+      var label = (a.textContent || a.title || '').trim();
+      if (!href || seen.has(href)) return;
+      if (!isNewsUrl(href)) { dbg('Skip (blocklist): ' + href, 'warn'); return; }
+      seen.add(href);
+      results.push({ url: href, title: label || slugToTitle(href), source: extractDomain(href), desc: getSurroundingText(doc, a) });
+    });
+
+    dbg('Links via <a>: ' + results.length);
+
+    // ── Passo 2: Varredura de texto plano por URLs brutas ──
+    var urlRegex = /https?:\/\/([\w-]+\.)+[\w]{2,}(\/[\w\-._%~:/?#[\]@!$&'()*+,;=%]*)?/g;
+    var texts    = [(doc.body && doc.body.innerText) || '', rawContent];
+    texts.forEach(function(txt) {
+      var m;
+      while ((m = urlRegex.exec(txt)) !== null) {
+        var href = m[0].replace(/[.,;:'")\]>]+$/, '');
+        if (seen.has(href)) return;
+        if (!isNewsUrl(href)) return;
+        seen.add(href);
+        results.push({ url: href, title: slugToTitle(href), source: extractDomain(href), desc: '' });
+      }
+    });
+
+    dbg('Total links após varredura: ' + results.length);
+    return results;
+  }
+
+  var SKIP_DOMAINS = new Set([
+    'spotify.com','podcasts.apple.com','anchor.fm','buzzsprout.com',
+    'podcastindex.org','listennotes.com','podchaser.com','pod.link',
+    'overcast.fm','pocketcasts.com','castro.fm','player.fm',
+    'podcastaddict.com','pocket-casts.com','breaker.audio',
+    'twitter.com','x.com','instagram.com','facebook.com','fb.com',
+    'youtube.com','youtu.be','tiktok.com','linkedin.com','reddit.com',
+    'patreon.com','paypal.com','ko-fi.com','buy.stripe.com','substack.com',
+    'amzn.to','amazon.com','audible.com','apple.com',
+    'linktr.ee','beacons.ai','bio.link',
+    'mailchimp.com','convertkit.com',
+  ]);
+
+  function isNewsUrl(url) {
+    try {
+      var u = new URL(url);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+      var domain = u.hostname.replace(/^www\./, '');
+      if (SKIP_DOMAINS.has(domain)) return false;
+      if (u.pathname.replace(/\//g, '').length < 3) return false;
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function extractDomain(url) {
+    try { return new URL(url).hostname.replace(/^www\./, ''); }
+    catch(e) { return url; }
+  }
+
+  function slugToTitle(url) {
+    try {
+      var parts = new URL(url).pathname.split('/').filter(Boolean);
+      var slug  = parts[parts.length - 1] || parts[parts.length - 2] || '';
+      return slug.replace(/[-_]/g,' ').replace(/\.[a-z0-9]+$/,'').replace(/\b\w/g, function(c){ return c.toUpperCase(); }).trim() || extractDomain(url);
+    } catch(e) { return url; }
+  }
+
+  function getSurroundingText(doc, anchor) {
+    var parent = anchor.closest('p, li, blockquote, div, td');
+    if (!parent) return '';
+    var txt = (parent.textContent || '').trim();
+    var at  = (anchor.textContent || '').trim();
+    if (txt.length <= at.length + 5) return '';
+    return txt.substring(0, 180).trim() + (txt.length > 180 ? '…' : '');
+  }
+
+  // =========================================================
+  //  RENDER EPISODE SECTION
+  // =========================================================
+  function renderEpisodeSection(epId, epTitle, epThumb, datePublished, links) {
+    var section = document.getElementById('ep-section-' + epId);
+    if (!section) return;
+
+    var carouselId = 'carousel-' + epId;
+    var cardsHtml  = links.length
+      ? links.map(function(l) { return newsCardHtml(l); }).join('')
+      : '<div class="carousel-slide"><div class="state-box" style="padding:30px 20px;text-align:left;">'
+        + '<div class="state-icon">🔍</div>'
+        + '<div class="state-title">Sem links encontrados</div>'
+        + '<div class="state-msg">Este episódio não tem links externos na descrição. Ative o painel Debug para detalhes.</div>'
+        + '</div></div>';
+
+    // Extrai dia e mês abreviado para o ícone de calendário
+    var calDay = '—', calMon = '';
+    if (datePublished) {
+      var d = new Date(datePublished * 1000);
+      calDay = d.getDate();
+      calMon = d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.','').toUpperCase();
+    }
+    var dateStr   = datePublished ? formatDate(datePublished * 1000) : '—';
+    var countText = links.length ? '(' + links.length + ' links)' : '';
+
+    section.innerHTML =
+      // ── Header idêntico ao screenshot ──
+      '<div class="episode-section-header">'
+      // barra roxa
+      + '<div class="ep-bar"></div>'
+      // ícone calendário
+      + '<div class="ep-cal">'
+      +   '<div class="ep-cal-top"><span>' + calMon + '</span></div>'
+      +   '<div class="ep-cal-day">' + calDay + '</div>'
+      + '</div>'
+      // data + count
+      + '<div class="episode-section-meta">'
+      +   '<div class="episode-section-title">' + dateStr + '</div>'
+      +   (links.length ? '<span class="episode-link-count">' + countText + '</span>' : '')
+      + '</div>'
+      // setas à direita
+      + '<div class="carousel-header-nav">'
+      +   '<button class="carousel-header-btn prev-btn" onclick="scrollCarousel(\'' + carouselId + '\',-1)" title="Anterior">&#8249;</button>'
+      +   '<button class="carousel-header-btn next-btn" onclick="scrollCarousel(\'' + carouselId + '\',1)" title="Próximo">&#8250;</button>'
+      + '</div>'
+      + '</div>'
+      // ── Carrossel ──
+      + '<div class="news-carousel-wrap">'
+      + '<div class="news-carousel-inner" id="' + carouselId + '">' + cardsHtml + '</div>'
+      + '</div>';
+  }
+
+  function newsCardHtml(link) {
+    var title  = esc(link.title  || link.source);
+    var desc   = esc(link.desc   || '');
+    var source = '@' + esc((link.source || '').toUpperCase());
+    var url    = esc(link.url);
+    var letter = (link.source || '?').charAt(0).toUpperCase();
+    // Tag baseada no domínio
+    var tag = guessTag(link.source, link.title);
+
+    return '<div class="carousel-slide">'
+      + '<div class="news-card" onclick="window.open(\'' + url + '\',\'_blank\')">'
+      // área da imagem (placeholder com quadradinho branco via CSS ::after)
+      + '<div class="news-card-img-wrap no-img"><span>' + letter + '</span></div>'
+      + '<div class="news-card-body">'
+      +   '<div class="news-card-title">' + title + '</div>'
+      +   '<span class="news-card-source">' + source + '</span>'
+      +   (desc ? '<p class="news-card-desc">' + desc + '</p>' : '')
+      +   '<span class="news-card-tag">' + tag + '</span>'
+      + '</div>'
+      + '</div></div>';
+  }
+
+  // Adivinha a tag da notícia a partir do domínio/título
+  function guessTag(source, title) {
+    var text = ((source || '') + ' ' + (title || '')).toLowerCase();
+    if (/nvidia|gpu|chip|amd|intel|hardware/.test(text)) return 'HARDWARE';
+    if (/hack|cyber|security|segurança|vuln/.test(text)) return 'CYBER';
+    if (/gpt|openai|gemini|llm|claude|ia|ai|anthropic|deepmind/.test(text)) return 'AI';
+    if (/oil|gas|petro|energy|energia/.test(text)) return 'ENERGY';
+    if (/finance|invest|market|stock|crypto/.test(text)) return 'FINANCE';
+    return 'TECH';
+  }
+
+  // =========================================================
+  //  CAROUSEL NAV
+  // =========================================================
+  function scrollCarousel(id, dir) {
+    var el = document.getElementById(id);
+    if (el) el.scrollBy({ left: dir * 320, behavior: 'smooth' });
+  }
+
+  // =========================================================
+  //  HELPERS
+  // =========================================================
+  function scrollToEpisode(epId) {
+    var el = document.getElementById('ep-section-' + epId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+  function formatDuration(secs) {
+    if (!secs) return '';
+    var h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60);
+    return h ? h + 'h ' + m + 'min' : m + 'min';
+  }
+  function esc(str) {
+    return String(str || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
+  }
+  function loadingSkeletonGrid(n) {
+    var card = '<div style="background:var(--surface);border-radius:16px;padding:18px;display:flex;gap:14px;">'
+      + '<div class="skeleton sk-block"></div>'
+      + '<div style="flex:1"><div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div>'
+      + '<div class="skeleton sk-line" style="width:40%;margin-top:12px;"></div></div></div>';
+    var out = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-top:30px;grid-column:1/-1;">';
+    for (var i = 0; i < n; i++) out += card;
+    return out + '</div>';
+  }
+  </script>
+</body>
+</html>

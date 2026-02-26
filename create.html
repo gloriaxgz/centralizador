@@ -40,7 +40,22 @@
       </div></div>
     </div>
   </header>
+<div id="drawer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;z-index:9998;"></div>
+<div id="episode-drawer" style="position:fixed;top:0;right:-400px;width:400px;height:100%;background:#1f2124;z-index:9999;transition:0.3s;padding:20px;overflow-y:auto;border-left:1px solid #444;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h4 style="color:white;">Episódios</h4>
+        <button onclick="closeDrawer()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">✕</button>
+    </div>
+    <div id="drawer-body"></div>
+</div>
 
+<div class="container" style="margin-top:20px;">
+    <div style="background:#282b2f;padding:15px;border-radius:15px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;">
+        <input type="text" id="cfg-key" placeholder="PodcastIndex Key" style="background:#1f2124;color:white;border:1px solid #444;padding:8px;border-radius:10px;">
+        <input type="password" id="cfg-secret" placeholder="PodcastIndex Secret" style="background:#1f2124;color:white;border:1px solid #444;padding:8px;border-radius:10px;">
+        <button onclick="saveCredentials()" class="orange-button" style="padding:8px 20px;">Salvar Chaves</button>
+    </div>
+</div>
   <div class="page-heading normal-space">
     <div class="container"><div class="row"><div class="col-lg-12">
       <h2>Transcritor de Podcasts</h2>
@@ -51,12 +66,17 @@
     <div class="container"><div class="row">
 
       <div class="col-lg-12">
-        <div class="section-heading">
-          <div class="line-dec"></div>
-          <h2>Cole o link do episódio abaixo</h2>
-          <p>Caso queira encontrar algum link de episódio, clique <a href="https://www.listennotes.com/">aqui</a>.</p>
-        </div>
-      </div>
+    <div class="section-heading">
+        <div class="line-dec"></div>
+        <h2>Busque um Podcast ou Cole o Link</h2>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:30px;">
+        <input type="text" id="podcast-search-input" placeholder="Pesquisar podcast (ex: Flow, Lex Fridman...)" 
+               style="flex:1;background-color:#37393c;color:white;border:none;padding:15px;border-radius:20px;">
+        <button onclick="searchPodcasts()" class="orange-button">Buscar Podcast</button>
+    </div>
+    <div id="podcast-results-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));gap:15px;margin-bottom:40px;"></div>
+</div>
 
       <div class="col-lg-12">
         <form id="transcription-form">
@@ -164,221 +184,280 @@
   <script>
   $(document).ready(function() {
 
+    // ── CONFIGURAÇÕES INICIAIS ────────────────────────────────
+    let API_KEY = localStorage.getItem('pi_key') || '';
+    let API_SECRET = localStorage.getItem('pi_secret') || '';
+
+    if (API_KEY) $('#cfg-key').val('••••••');
+    if (API_SECRET) $('#cfg-secret').val('••••••');
+
     // ── TOAST ──────────────────────────────────────────────────
     let toastTimer;
     function showToast(msg, color) {
-      const t = document.getElementById('podcast-toast');
-      t.textContent = msg;
-      t.style.borderColor = color || '#00ffcc';
-      t.style.color       = color || '#00ffcc';
-      t.style.opacity     = '1';
-      t.style.transform   = 'translateX(-50%) translateY(0)';
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        t.style.opacity   = '0';
-        t.style.transform = 'translateX(-50%) translateY(20px)';
-      }, 3000);
+        const t = document.getElementById('podcast-toast');
+        t.textContent = msg;
+        t.style.borderColor = color || '#00ffcc';
+        t.style.color = color || '#00ffcc';
+        t.style.opacity = '1';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.transform = 'translateX(-50%) translateY(20px)';
+        }, 3000);
     }
 
-    // ── 1. TRANSCRIÇÃO ─────────────────────────────────────────
-    $('#transcription-form').on('submit', function(e) {
-      e.preventDefault();
-      const linkAudio = $('#audio-url').val().trim();
-      if (!linkAudio) { alert('Por favor, insira uma URL válida.'); return; }
+    // ── AUTH & CREDENTIALS PODCAST INDEX ──────────────────────
+    window.saveCredentials = function() {
+        const k = $('#cfg-key').val().trim();
+        const s = $('#cfg-secret').val().trim();
+        if (!k || !s || k === '••••••') { showToast('Insira credenciais válidas.', '#ff4d6d'); return; }
+        API_KEY = k; API_SECRET = s;
+        localStorage.setItem('pi_key', k);
+        localStorage.setItem('pi_secret', s);
+        showToast('✓ Credenciais salvas com sucesso!');
+    };
 
-      const $botao = $('#form-submit');
-      $botao.text('Transcrevendo... (Isso pode demorar)').prop('disabled', true);
+    async function getAuthHeaders() {
+        if (!API_KEY || !API_SECRET) throw new Error('NO_CREDENTIALS');
+        const epoch = Math.floor(Date.now() / 1000).toString();
+        const txt = API_KEY + API_SECRET + epoch;
+        const buf = new TextEncoder().encode(txt);
+        const hashBuffer = await crypto.subtle.digest('SHA-1', buf);
+        const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        return {
+            'X-Auth-Key': API_KEY,
+            'X-Auth-Date': epoch,
+            'Authorization': hashHex,
+            'User-Agent': 'PodcastRadar/1.0'
+        };
+    }
 
-      $('#section-resultados').fadeIn();
-      $('#texto-transcrito').text('A IA está ouvindo o áudio agora...');
-      $('#container-topicos, #resumo-wrapper').hide();
+    // ── BUSCA E SELEÇÃO DE PODCASTS ───────────────────────────
+    window.searchPodcasts = async function() {
+        const q = $('#podcast-search-input').val().trim();
+        if (!q) return;
+        if (!API_KEY) { showToast('Configure as chaves primeiro!', '#ff4d6d'); return; }
 
-      $.ajax({
-        url: '/api/transcribe',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify({ audioUrl: linkAudio }),
-        success: function(response) {
-          const texto = response.transcript;
-          $('#texto-transcrito').text(texto);
-          $botao.text('Iniciar Nova Transcrição').prop('disabled', false);
-          extrairTopicosRobustos(texto);
-        },
-        error: function(err) {
-          console.error('Erro na transcrição:', err);
-          $('#texto-transcrito').text('Erro ao transcrever: ' + (err.responseJSON?.error || 'Verifique o link ou as chaves da API.'));
-          $botao.text('Tentar Novamente').prop('disabled', false);
-        }
-      });
-    });
+        $('#podcast-results-grid').html('<p style="color:white; grid-column:1/-1; text-align:center;">🔍 Buscando podcasts...</p>');
 
-    // ── 2. EXTRAÇÃO DE TÓPICOS ─────────────────────────────────
-    function extrairTopicosRobustos(texto) {
-      $('#container-topicos').fadeIn();
-      $('#lista-topicos').html('<p style="color:white;text-align:center;">IA identificando temas e criando resumos prévios...</p>');
+        try {
+            const headers = await getAuthHeaders();
+            const res = await fetch(`https://api.podcastindex.org/api/1.0/search/byterm?q=${encodeURIComponent(q)}&max=6`, { headers });
+            const data = await res.json();
+            const feeds = data.feeds || [];
 
-      $.ajax({
-        url: '/api/chat',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify({
-          messages: [{
-            role: 'system',
-            content: 'Analyze the transcript and identify 7 main topics. Ignore topics about the hosts of the podcast and about Alura. For each topic: 1. Title (Professional). 2. A robust summary (one paragraph, 3-5 sentences) with relevant info. Return ONLY a JSON array: [{"title": "...", "summary": "..."}]'
-          }, {
-            role: 'user',
-            content: 'Transcript: ' + texto.substring(0, 15000)
-          }],
-          temperature: 0.3
-        }),
-        success: function(response) {
-          try {
-            const content   = response.content;
-            const cleanJson = content.replace(/```json|```/g, '');
-            const topicos   = JSON.parse(cleanJson);
+            if (feeds.length === 0) {
+                $('#podcast-results-grid').html('<p style="color:white; grid-column:1/-1; text-align:center;">Nenhum resultado encontrado.</p>');
+                return;
+            }
 
             let html = '';
-            topicos.forEach(t => {
-              const searchLink = `https://www.google.com/search?q=${encodeURIComponent(t.title)}+news+ai+tech&tbm=nws`;
-              html += `
-                <label class="topic-item">
-                  <input type="checkbox" name="podcast-topic"
-                         value="${t.title}"
-                         data-summary="${t.summary.replace(/"/g,'&quot;')}">
-                  <div class="topic-content">
-                    <span class="topic-title">${t.title}</span>
-                    <span class="topic-desc">${t.summary}</span>
-                    <a href="${searchLink}" target="_blank" class="news-link">
-                      <i class="fa fa-external-link"></i> Ver notícias relacionadas
-                    </a>
-                  </div>
-                </label>`;
+            feeds.forEach(f => {
+                html += `
+                <div class="podcast-card" onclick="loadEpisodes(${f.id})" style="cursor:pointer; background:#282b2f; padding:15px; border-radius:20px; text-align:center; transition: transform 0.2s;">
+                    <img src="${f.artwork || f.image}" style="width:100%; border-radius:15px; margin-bottom:10px;" onerror="this.src='assets/images/current-01.jpg'">
+                    <h6 style="color:white; font-size:13px; margin-bottom:0;">${f.title}</h6>
+                </div>`;
             });
-            $('#lista-topicos').html(html);
-
-          } catch(e) {
-            $('#lista-topicos').text('Erro ao processar tópicos.');
-          }
+            $('#podcast-results-grid').html(html);
+        } catch (e) {
+            showToast('Erro na busca: ' + e.message, '#ff4d6d');
         }
-      });
+    };
+
+    window.loadEpisodes = async function(feedId) {
+        $('#drawer-overlay').fadeIn();
+        $('#episode-drawer').css('right', '0');
+        $('#drawer-body').html('<div style="text-align:center; padding:40px;"><div class="spin"></div><p style="color:white; margin-top:15px;">Carregando episódios...</p></div>');
+
+        try {
+            const headers = await getAuthHeaders();
+            const res = await fetch(`https://api.podcastindex.org/api/1.0/episodes/byfeedid?id=${feedId}&max=30`, { headers });
+            const data = await res.json();
+            const items = data.items || [];
+
+            let html = '';
+            items.forEach(ep => {
+                const date = new Date(ep.datePublished * 1000).toLocaleDateString('pt-BR');
+                html += `
+                <div onclick="selectEpisode('${ep.enclosureUrl}')" style="padding:15px; border-bottom:1px solid #333; cursor:pointer; transition: background 0.2s;" onmouseover="this.style.background='#2d3035'" onmouseout="this.style.background='transparent'">
+                    <small style="color:#00ffcc;">📅 ${date}</small>
+                    <p style="color:white; margin:5px 0 0 0; font-size:14px; font-weight:500;">${ep.title}</p>
+                </div>`;
+            });
+            $('#drawer-body').html(html || '<p style="color:white;">Nenhum episódio encontrado.</p>');
+        } catch (e) {
+            $('#drawer-body').html('<p style="color:white;">Erro ao carregar episódios.</p>');
+        }
+    };
+
+    window.selectEpisode = function(url) {
+        $('#audio-url').val(url);
+        window.closeDrawer();
+        showToast("✓ Link selecionado!");
+        $('html, body').animate({ scrollTop: $('#transcription-form').offset().top - 100 }, 500);
+    };
+
+    window.closeDrawer = function() {
+        $('#episode-drawer').css('right', '-400px');
+        $('#drawer-overlay').fadeOut();
+    };
+
+    $('#drawer-overlay').on('click', window.closeDrawer);
+
+    // ── 1. TRANSCRIÇÃO (PYTHON API) ───────────────────────────
+    $('#transcription-form').on('submit', function(e) {
+        e.preventDefault();
+        const linkAudio = $('#audio-url').val().trim();
+        if (!linkAudio) { showToast('Insira uma URL válida.', '#ff4d6d'); return; }
+
+        const $botao = $('#form-submit');
+        $botao.html('<i class="fa fa-spinner fa-spin"></i> Processando Áudio (Whisper)...').prop('disabled', true);
+
+        $('#section-resultados').fadeIn();
+        $('#texto-transcrito').text('Baixando e transcrevendo áudio... Isso pode levar alguns minutos para episódios longos.');
+        $('#container-topicos, #resumo-wrapper').hide();
+
+        $.ajax({
+            url: '/api/transcribe',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify({ audioUrl: linkAudio }),
+            success: function(response) {
+                const texto = response.transcript;
+                $('#texto-transcrito').text(texto);
+                
+                if (response.cached) {
+                    showToast("🚀 Recuperado do cache instantaneamente!");
+                } else {
+                    showToast("✅ Transcrição finalizada!");
+                }
+                
+                $botao.text('Iniciar Nova Transcrição').prop('disabled', false);
+                extrairTopicosRobustos(texto);
+            },
+            error: function(err) {
+                console.error('Erro na transcrição:', err);
+                $('#texto-transcrito').text('Erro: ' + (err.responseJSON?.error || 'Falha na comunicação com a API Python.'));
+                $botao.text('Tentar Novamente').prop('disabled', false);
+            }
+        });
+    });
+
+    // ── 2. EXTRAÇÃO DE TÓPICOS (CHAT GPT-4O) ──────────────────
+    function extrairTopicosRobustos(texto) {
+        $('#container-topicos').fadeIn();
+        $('#lista-topicos').html('<p style="color:white;text-align:center;"><i class="fa fa-cog fa-spin"></i> IA identificando temas estratégicos...</p>');
+
+        $.ajax({
+            url: '/api/chat',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify({
+                messages: [{
+                    role: 'system',
+                    content: 'Analyze the transcript and identify 7 main topics. Ignore meta-talk about the podcast itself. For each topic: 1. Title (Professional). 2. A robust summary (3-5 sentences). Return ONLY a JSON array: [{"title": "...", "summary": "..."}]'
+                }, {
+                    role: 'user',
+                    content: 'Transcript: ' + texto.substring(0, 18000)
+                }],
+                temperature: 0.3
+            }),
+            success: function(response) {
+                try {
+                    const content = response.content;
+                    const cleanJson = content.replace(/```json|```/g, '');
+                    const topicos = JSON.parse(cleanJson);
+
+                    let html = '';
+                    topicos.forEach(t => {
+                        const searchLink = `https://www.google.com/search?q=${encodeURIComponent(t.title)}+news+ai+tech&tbm=nws`;
+                        html += `
+                            <label class="topic-item">
+                                <input type="checkbox" name="podcast-topic" value="${t.title}" data-summary="${t.summary.replace(/"/g,'&quot;')}">
+                                <div class="topic-content">
+                                    <span class="topic-title">${t.title}</span>
+                                    <span class="topic-desc">${t.summary}</span>
+                                    <a href="${searchLink}" target="_blank" class="news-link"><i class="fa fa-external-link"></i> Ver notícias</a>
+                                </div>
+                            </label>`;
+                    });
+                    $('#lista-topicos').html(html);
+                } catch(e) {
+                    $('#lista-topicos').text('Erro ao processar tópicos. Tente gerar o relatório direto.');
+                }
+            }
+        });
     }
 
     // ── 3. RELATÓRIO FINAL ─────────────────────────────────────
     $('#btn-gerar-resumo-final').on('click', function() {
-      const selecionados = [];
-      $("input[name='podcast-topic']:checked").each(function() {
-        selecionados.push($(this).val());
-      });
-      if (selecionados.length === 0) {
-        return alert('Por favor, selecione pelo menos um tópico!');
-      }
+        const selecionados = [];
+        $("input[name='podcast-topic']:checked").each(function() { selecionados.push($(this).val()); });
+        if (selecionados.length === 0) return alert('Selecione ao menos um tópico!');
 
-      const $btn = $(this);
-      $btn.text('IA Gerando Relatório Técnico...').prop('disabled', true);
-      $('#resumo-wrapper').fadeIn();
-      $('#resultado-resumo').html('Processando seções independentes...');
+        const $btn = $(this);
+        $btn.text('⏳ Gerando Relatório...').prop('disabled', true);
+        $('#resumo-wrapper').fadeIn();
+        $('#resultado-resumo').html('Aguarde, consolidando análise técnica...');
 
-      $.ajax({
-        url: '/api/chat',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        data: JSON.stringify({
-          messages: [{
-            role: 'user',
-            content: `Summarize the following podcast transcript. 
-IMPORTANT: Create a SEPARATE section for EACH of the following selected topics: ${selecionados.join(', ')}.
-
-## Remember: ## 
-You are an expert News Curator for Computer Science students and AI Engineers.
-Your goal is to provide a comprehensive technical analysis.
-
-For EACH topic, output a structured report:
-### [TITLE]
-** [Summary (2-3 lines)] ** - [Detailed Bullet 1] 
-- [Detailed Bullet 2] 
-- [Detailed Bullet 3] 
-
-Formatting: Use <b> for bold and <br> for break lines. Separate articles with <hr>.
-
-## TRANSCRIPT ##
-${$('#texto-transcrito').text().substring(0, 20000)}`
-          }],
-          temperature: 0.2
-        }),
-        success: function(response) {
-          const resumoFinal = response.content.replace(/\n/g, '<br>');
-          $('#resultado-resumo').html(resumoFinal);
-          $btn.text('Gerar Relatório Individualizado').prop('disabled', false);
-          $('html,body').animate({ scrollTop: $('#resumo-wrapper').offset().top - 50 }, 600);
-        }
-      });
+        $.ajax({
+            url: '/api/chat',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            data: JSON.stringify({
+                messages: [{
+                    role: 'user',
+                    content: `Summarize the following transcript. Sections for: ${selecionados.join(', ')}. Format with <h3>, <b> and <br>. Transcript: ${$('#texto-transcrito').text().substring(0, 20000)}`
+                }],
+                temperature: 0.2
+            }),
+            success: function(response) {
+                $('#resultado-resumo').html(response.content.replace(/\n/g, '<br>'));
+                $btn.text('Gerar Relatório Individualizado').prop('disabled', false);
+                $('html,body').animate({ scrollTop: $('#resumo-wrapper').offset().top - 50 }, 600);
+            }
+        });
     });
 
-    // ── 4. ENVIAR TÓPICOS SELECIONADOS PARA NEWSBOARD ──────────
+    // ── 4. NEWSBOARD & AUXILIARES ──────────────────────────────
     $('#btn-send-to-board').on('click', async function() {
-      const selecionados = [];
-      $("input[name='podcast-topic']:checked").each(function() {
-        selecionados.push({
-          title:  $(this).val(),
-          // summary vai para o campo "notas" do Newsboard
-          notes:  $(this).data('summary') || '',
-          source: 'Podcast',
-          url:    '',
-          tags:   'Podcast',
-        });
-      });
-
-      if (selecionados.length === 0) {
-        return alert('Selecione pelo menos um tópico antes de enviar.');
-      }
-
-      const $btn = $(this);
-      $btn.css('pointer-events','none').css('opacity','0.6');
-
-      try {
-        const res = await fetch('/api/newsboard?action=pending', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ articles: selecionados }),
+        const selecionados = [];
+        $("input[name='podcast-topic']:checked").each(function() {
+            selecionados.push({ title: $(this).val(), notes: $(this).data('summary') || '', source: 'Podcast', url: '', tags: 'Podcast' });
         });
 
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (selecionados.length === 0) return alert('Selecione um tópico.');
 
-        showToast(`${selecionados.length} tópico${selecionados.length > 1 ? 's' : ''} enviado${selecionados.length > 1 ? 's' : ''} para o Newsboard ✓`);
-        $btn.html('✓ Enviado!').css('background','rgba(0,255,204,.12)').css('opacity','1');
-        setTimeout(() => {
-          $btn.html(' Enviar Tópicos para Newsboard')
-              .css('background','transparent')
-              .css('pointer-events','auto');
-        }, 2500);
-
-        // Abre Newsboard em nova aba
-        window.open('table.html', '_blank');
-
-      } catch(e) {
-        showToast('Erro ao enviar para o servidor.', '#ff4d6d');
-        $btn.css('pointer-events','auto').css('opacity','1');
-      }
+        try {
+            const res = await fetch('/api/newsboard?action=pending', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ articles: selecionados }),
+            });
+            if (res.ok) {
+                showToast(`✓ ${selecionados.length} itens enviados ao Newsboard`);
+                window.open('table.html', '_blank');
+            }
+        } catch(e) { showToast('Erro ao enviar.', '#ff4d6d'); }
     });
 
-    // ── AUXILIARES ─────────────────────────────────────────────
     $('#toggle-transcricao').on('click', function() {
-      const container = $('#resultado-container');
-      container.toggleClass('collapsed expanded');
-      $(this).text(container.hasClass('expanded') ? '▲ Recolher Texto' : '▼ Expandir Texto');
+        const container = $('#resultado-container');
+        container.toggleClass('collapsed expanded');
+        $(this).text(container.hasClass('expanded') ? '▲ Recolher Texto' : '▼ Expandir Texto');
     });
 
     $('.btn-copy').on('click', function() {
-      const target = $(this).attr('id') === 'copy-transcricao'
-        ? '#texto-transcrito'
-        : '#resultado-resumo';
-      navigator.clipboard.writeText($(target).text()).then(() => {
-        $(this).text(' Copiado!');
-        setTimeout(() => $(this).text('Copiar'), 2000);
-      });
+        const target = $(this).attr('id') === 'copy-transcricao' ? '#texto-transcrito' : '#resultado-resumo';
+        navigator.clipboard.writeText($(target).text()).then(() => {
+            const oldTxt = $(this).text();
+            $(this).text('✓ Copiado!');
+            setTimeout(() => $(this).text(oldTxt), 2000);
+        });
     });
-
-  });
+});
   </script>
 </body>
 </html>

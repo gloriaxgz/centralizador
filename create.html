@@ -226,8 +226,9 @@
 
     // ── 2. Carregar episódios no drawer ───────────────────────
     window.loadEpisodes = async function (feedId) {
-      $('#drawer-overlay').fadeIn();
-      $('#episode-drawer').css('right', '0');
+      document.getElementById('drawer-overlay').classList.add('open');
+      document.getElementById('episode-drawer').classList.add('open');
+      document.body.style.overflow = 'hidden';
       $('#drawer-body').html('<div class="episode-item"><small style="color:var(--cyan)">Carregando...</small></div>');
       try {
         const headers = await getAuthHeaders();
@@ -255,10 +256,11 @@
     };
 
     window.closeDrawer = function () {
-      $('#episode-drawer').css('right', '-400px');
-      $('#drawer-overlay').fadeOut();
+      document.getElementById('episode-drawer').classList.remove('open');
+      document.getElementById('drawer-overlay').classList.remove('open');
+      document.body.style.overflow = '';
     };
-    $('#drawer-overlay').on('click', window.closeDrawer);
+    document.getElementById('drawer-overlay').addEventListener('click', window.closeDrawer);
 
     // ── 3. Transcrição ────────────────────────────────────────
     $('#transcription-form').on('submit', function (e) {

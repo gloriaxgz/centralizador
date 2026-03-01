@@ -1,85 +1,102 @@
 import os
-import requests
-import uuid
 import math
+import uuid
 import hashlib
+import requests
 from flask import Flask, request, jsonify
 from openai import OpenAI
-from pydub import AudioSegment
 from upstash_redis import Redis
 
 app = Flask(__name__)
 
-# Configurações de API
 client = OpenAI(api_key=os.environ.get("OPENAI_KEY"))
-redis = Redis(url=os.environ.get("KV_REST_API_URL"), token=os.environ.get("KV_REST_API_TOKEN"))
+redis  = Redis(url=os.environ.get("KV_REST_API_URL"), token=os.environ.get("KV_REST_API_TOKEN"))
+
+# Whisper aceita até 25 MB por requisição
+WHISPER_LIMIT_BYTES = 24 * 1024 * 1024  # 24 MB com margem de segurança
+
 
 @app.route('/api/transcribe', methods=['POST'])
 def transcribe_podcast():
-    data = request.json
-    audio_url = data.get('audioUrl')
-    
+    data      = request.json or {}
+    audio_url = data.get('audioUrl', '').strip()
+
     if not audio_url:
         return jsonify({"error": "URL do áudio não fornecida"}), 400
 
-    # 1. Verificar Cache no Redis
-    # Usamos um hash da URL como chave para evitar problemas com caracteres especiais
-    cache_key = f"transcription:{hashlib.md5(audio_url.encode()).hexdigest()}"
+    # ── 1. Cache ──────────────────────────────────────────────────────────────
+    cache_key   = f"transcription:{hashlib.md5(audio_url.encode()).hexdigest()}"
     cached_text = redis.get(cache_key)
-
     if cached_text:
-        print(f"Cache hit para: {audio_url}")
         return jsonify({"transcript": cached_text, "cached": True}), 200
 
-    # Se não estiver no cache, começamos o processo...
-    temp_id = str(uuid.uuid4())
+    temp_id    = str(uuid.uuid4())
     input_path = f"/tmp/{temp_id}_original.mp3"
-    
+
     try:
-        # 2. Download do áudio
-        response = requests.get(audio_url, stream=True)
+        # ── 2. Download ───────────────────────────────────────────────────────
+        resp = requests.get(audio_url, stream=True, timeout=120,
+                            headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+
         with open(input_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
+            for chunk in resp.iter_content(chunk_size=65536):
                 f.write(chunk)
 
-        # 3. Carregar e Comprimir
-        audio = AudioSegment.from_file(input_path)
-        audio = audio.set_channels(1) # Mono
-        
-        chunk_length_ms = 15 * 60 * 1000 # 15 minutos
-        total_length_ms = len(audio)
-        chunks_count = math.ceil(total_length_ms / chunk_length_ms)
-        
-        full_transcript = []
+        file_size = os.path.getsize(input_path)
 
-        # 4. Transcrição por pedaços
-        for i in range(chunks_count):
-            start = i * chunk_length_ms
-            end = min((i + 1) * chunk_length_ms, total_length_ms)
-            
-            chunk_path = f"/tmp/{temp_id}_part_{i}.mp3"
-            audio[start:end].export(chunk_path, format="mp3", bitrate="32k")
-            
-            with open(chunk_path, "rb") as f:
-                trans_res = client.audio.transcriptions.create(
+        # ── 3. Transcrição ────────────────────────────────────────────────────
+        # Arquivo cabe em uma única requisição → envia direto, sem chunking
+        if file_size <= WHISPER_LIMIT_BYTES:
+            with open(input_path, "rb") as f:
+                result = client.audio.transcriptions.create(
                     model="whisper-1",
                     file=f,
                     language="pt"
                 )
-                full_transcript.append(trans_res.text)
-            
-            os.remove(chunk_path) # Limpa pedaço
+            final_text = result.text
 
-        final_text = " ".join(full_transcript)
+        # Arquivo grande → divide em pedaços por bytes
+        # MP3 é orientado a frames: cortar nos bytes raramente causa problema
+        # perceptível para transcrição (o Whisper é robusto a isso).
+        else:
+            num_chunks  = math.ceil(file_size / WHISPER_LIMIT_BYTES)
+            chunk_size  = math.ceil(file_size / num_chunks)
+            transcripts = []
 
-        # 5. Salvar no Cache do Redis (expira em 30 dias para economizar espaço se desejar)
-        # O padrão abaixo salva permanentemente
+            with open(input_path, 'rb') as src:
+                for i in range(num_chunks):
+                    chunk_path = f"/tmp/{temp_id}_part_{i}.mp3"
+                    chunk_data = src.read(chunk_size)
+                    if not chunk_data:
+                        break
+                    with open(chunk_path, 'wb') as cf:
+                        cf.write(chunk_data)
+                    try:
+                        with open(chunk_path, 'rb') as cf:
+                            res = client.audio.transcriptions.create(
+                                model="whisper-1",
+                                file=cf,
+                                language="pt"
+                            )
+                            transcripts.append(res.text)
+                    finally:
+                        if os.path.exists(chunk_path):
+                            os.remove(chunk_path)
+
+            final_text = " ".join(transcripts)
+
+        # ── 4. Cache (30 dias) ────────────────────────────────────────────────
         redis.set(cache_key, final_text, ex=2592000)
-        # Limpeza do arquivo original
-        os.remove(input_path)
 
         return jsonify({"transcript": final_text, "cached": False}), 200
 
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"Falha no download do áudio: {str(e)}"}), 502
+
     except Exception as e:
-        if os.path.exists(input_path): os.remove(input_path)
         return jsonify({"error": str(e)}), 500
+
+    finally:
+        if os.path.exists(input_path):
+            os.remove(input_path)

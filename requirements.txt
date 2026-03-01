@@ -2,4 +2,3 @@ flask
 requests
 openai
 upstash-redis
-pydub
